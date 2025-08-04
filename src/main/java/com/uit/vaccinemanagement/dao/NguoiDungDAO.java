@@ -1,0 +1,83 @@
+package com.uit.vaccinemanagement.dao;
+
+import com.uit.vaccinemanagement.model.NguoiDung;
+import com.uit.vaccinemanagement.util.DBConnection;
+import com.uit.vaccinemanagement.util.Role;
+import java.sql.*;
+import java.util.*;
+
+public class NguoiDungDAO {
+
+    public List<NguoiDung> getAllNguoiDung() {
+        List<NguoiDung> list = new ArrayList<>();
+        String sql = "SELECT * FROM Nguoi_Dung";
+        try (Connection conn = DBConnection.getConnection(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                NguoiDung nd = new NguoiDung(
+                        rs.getString("ma_nguoi_dung"),
+                        rs.getString("ho_ten"),
+                        rs.getString("ten_dang_nhap"),
+                        rs.getString("email"),
+                        rs.getString("mat_khau"),
+                        Role.valueOf(rs.getString("vai_tro").toUpperCase()),
+                        rs.getDate("ngay_sinh"),
+                        rs.getString("gioi_tinh"),
+                        rs.getTimestamp("ngay_tao")
+                );
+                list.add(nd);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public boolean addNguoiDung(NguoiDung nd) {
+        String sql = "INSERT INTO Nguoi_Dung(ma_nguoi_dung, ho_ten, ten_dang_nhap, email, mat_khau, vai_tro, ngay_sinh, gioi_tinh, ngay_tao) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, nd.getMaNguoiDung());
+            ps.setString(2, nd.getHoTen());
+            ps.setString(3, nd.getTenDangNhap());
+            ps.setString(4, nd.getEmail());
+            ps.setString(5, nd.getMatKhau());
+            ps.setString(6, nd.getVaiTro().name().toLowerCase());
+            ps.setDate(7, nd.getNgaySinh());
+            ps.setString(8, nd.getGioiTinh());
+            ps.setTimestamp(9, nd.getNgayTao());
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean updateNguoiDung(NguoiDung nd) {
+        String sql = "UPDATE Nguoi_Dung SET ho_ten=?, ten_dang_nhap=?, email=?, mat_khau=?, vai_tro=?, ngay_sinh=?, gioi_tinh=?, ngay_tao=? WHERE ma_nguoi_dung=?";
+        try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, nd.getHoTen());
+            ps.setString(2, nd.getTenDangNhap());
+            ps.setString(3, nd.getEmail());
+            ps.setString(4, nd.getMatKhau());
+            ps.setString(5, nd.getVaiTro().name().toLowerCase());
+            ps.setDate(6, nd.getNgaySinh());
+            ps.setString(7, nd.getGioiTinh());
+            ps.setTimestamp(8, nd.getNgayTao());
+            ps.setString(9, nd.getMaNguoiDung());
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean deleteNguoiDung(String maNguoiDung) {
+        String sql = "DELETE FROM Nguoi_Dung WHERE ma_nguoi_dung=?";
+        try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, maNguoiDung);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+}
