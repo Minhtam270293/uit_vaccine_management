@@ -64,4 +64,23 @@ public class NhaSanXuatDAO {
         }
         return false;
     }
+
+    public List<Object[]> getAllNhaSanXuatAsObjectArray() {
+        List<Object[]> result = new ArrayList<>();
+        String sql = "SELECT * FROM Nha_San_Xuat";
+        try (Connection conn = DBConnection.getConnection(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                Object[] row = {
+                    rs.getString("ma_nha_sx"),
+                    rs.getString("ten_nha_sx"),
+                    rs.getString("quoc_gia"),
+                    rs.getTimestamp("ngay_tao")
+                };
+                result.add(row);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
 }

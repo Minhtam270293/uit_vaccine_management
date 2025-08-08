@@ -16,7 +16,7 @@ public class VaccineManagement {
         showLogin();
     }
 
-    private static void showLogin() {
+    public static void showLogin() {
         AuthView authView = new AuthView();
         authView.showAuthUI(new AuthView.AuthCallback() {
             @Override
@@ -27,13 +27,13 @@ public class VaccineManagement {
                             && nd.getMatKhau().equals(PasswordUtils.hashPassword(password))) {
                         switch (nd.getVaiTro()) {
                             case ADMIN:
-                                new AdminView(new AdminController()).showAdminUI();
+                                new AdminView(nd).showAdminUI();
                                 break;
                             case BACSI:
-                                new BacSiView().showBacSiUI();
+                                new BacSiView(nd).showBacSiUI();
                                 break;
                             case KHACH:
-                                new KhachView().showKhachUI();
+                                new KhachView(nd).showKhachUI();
                                 break;
                         }
                         return;

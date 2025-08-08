@@ -1,3 +1,4 @@
+
 package com.uit.vaccinemanagement.dao;
 
 import com.uit.vaccinemanagement.model.TiemChung;
@@ -76,4 +77,56 @@ public class TiemChungDAO {
         }
         return false;
     }
+
+    public List<Object[]> getByMaKhach(String maKhach) {
+        List<Object[]> result = new ArrayList<>();
+        String sql = "SELECT * FROM Tiem_Chung WHERE ma_khach = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, maKhach);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Object[] row = {
+                        rs.getString("ma_tiem_chung"),
+                        rs.getDate("ngay_tiem"),
+                        rs.getString("ma_vaccine"),
+                        rs.getString("ma_bac_si"),
+                        rs.getString("trang_thai_tiem"),
+                        rs.getString("ghi_chu")
+                    };
+                    result.add(row);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+        public List<Object[]> getByMaBacSi(String maBacSi) {
+        List<Object[]> result = new ArrayList<>();
+        String sql = "SELECT * FROM Tiem_Chung WHERE ma_bac_si = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, maBacSi);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Object[] row = {
+                        rs.getString("ma_tiem_chung"),
+                        rs.getDate("ngay_tiem"),
+                        rs.getString("ma_vaccine"),
+                        rs.getString("ma_bac_si"),
+                        rs.getString("ma_khach"),
+                        rs.getString("trang_thai_tiem"),
+                        rs.getString("ghi_chu")
+                    };
+                    result.add(row);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
 }
+

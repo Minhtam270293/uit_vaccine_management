@@ -94,4 +94,31 @@ public class VaccineDAO {
         }
         return false;
     }
+
+    public List<Object[]> getAllVaccineAsObjectArray() {
+        List<Object[]> result = new ArrayList<>();
+        String sql = "SELECT * FROM Vaccine";
+        try (Connection conn = DBConnection.getConnection(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                Object[] row = {
+                    rs.getString("ma_vaccine"),
+                    rs.getString("ten_vaccine"),
+                    rs.getString("so_lo"),
+                    rs.getDate("ngay_sx"),
+                    rs.getDate("ngay_het_han"),
+                    rs.getInt("tong_sl"),
+                    rs.getInt("sl_con_lai"),
+                    rs.getDouble("gia_nhap"),
+                    rs.getDouble("gia_ban"),
+                    rs.getString("ma_benh"),
+                    rs.getString("ma_nha_sx"),
+                    rs.getTimestamp("ngay_tao")
+                };
+                result.add(row);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
 }

@@ -70,4 +70,29 @@ public class ThongTinMuaDAO {
         }
         return false;
     }
+
+    public List<Object[]> getByMaKhach(String maKhach) {
+        List<Object[]> result = new ArrayList<>();
+        String sql = "SELECT * FROM thong_tin_mua WHERE ma_khach = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, maKhach);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Object[] row = {
+                        rs.getInt("ma_giao_dich"),
+                        rs.getInt("ma_vaccine"),
+                        rs.getInt("ma_khach"),
+                        rs.getInt("so_luong_mua"),
+                        rs.getDouble("tong_tien"),
+                        rs.getTimestamp("ngay_giao_dich")
+                    };
+                    result.add(row);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
 }
