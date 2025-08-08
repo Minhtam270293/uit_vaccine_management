@@ -1,0 +1,19 @@
+INSERT INTO Benh (ten_benh, mo_ta) VALUES
+('Cúm', 'Bệnh cúm do virus gây ra, ảnh hưởng đến hệ hô hấp.'),
+('Sởi', 'Bệnh sởi là bệnh truyền nhiễm do virus sởi.');
+
+INSERT INTO Nha_San_Xuat (ten_nha_sx, quoc_gia) VALUES
+('Pfizer', 'Mỹ'),
+('VNVC', 'Việt Nam');
+
+INSERT INTO Vaccine (ten_vaccine, hinh_anh_url, so_lo, ngay_sx, ngay_het_han, tong_sl, sl_con_lai, gia_nhap, gia_ban, mo_ta, ma_benh, ma_nha_sx) VALUES
+('Pfizer Covid-19', 'https://example.com/pfizer.jpg', 'PFZ123', '2025-01-01', '2026-01-01', 1000, 800, 200000, 250000, 'Vaccine phòng Covid-19', 1, 1),
+('Sởi VNVC', 'https://example.com/soi.jpg', 'VNVC456', '2025-02-01', '2026-02-01', 500, 400, 100000, 120000, 'Vaccine phòng bệnh sởi', 2, 2);
+
+INSERT INTO Thong_Tin_Mua (ma_vaccine, ma_khach, so_luong_mua, tong_tien) VALUES
+(1, 2, 2, 500000), -- khach mua 2 liều Pfizer
+(2, 2, 1, 120000); -- khach mua 1 liều Sởi VNVC
+
+INSERT INTO Tiem_Chung (ma_vaccine, ma_bac_si, ma_khach, ngay_chi_dinh, ngay_tiem, trang_thai_tiem, ghi_chu) VALUES
+(1, 3, 2, '2025-08-01', '2025-08-05', 'da_tiem', 'Tiêm mũi 1 Pfizer'),
+(2, 3, 2, '2025-08-02', '2025-08-06', 'da_tiem', 'Tiêm mũi Sởi VNVC');
