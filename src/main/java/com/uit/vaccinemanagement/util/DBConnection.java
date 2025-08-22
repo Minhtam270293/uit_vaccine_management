@@ -6,10 +6,10 @@ import java.sql.SQLException;
 
 public class DBConnection {
 
-    private static final String URL = "jdbc:mysql://localhost:3306/vaccine_management?useSSL=false&serverTimezone=UTC";
-    private static final String USER = "root";
-    private static final String PASSWORD = "";
-
+    private static final String URL = "jdbc:mysql://sql12.freesqldatabase.com:3306/sql12795449?useSSL=false&serverTimezone=UTC";
+    private static final String USER = "sql12795449";
+    private static final String PASSWORD = "gyXtz2l7an";
+    
     public static Connection getConnection() throws SQLException {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");

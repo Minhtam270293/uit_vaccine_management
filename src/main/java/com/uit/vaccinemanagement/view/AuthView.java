@@ -21,9 +21,9 @@ public class AuthView {
         panel.setLayout(new GridLayout(3, 2, 5, 5));
 
         JLabel lblEmail = new JLabel("Email:");
-        JTextField txtEmail = new JTextField();
+        JTextField txtEmail = new JTextField("bacsi@gmail.com");
         JLabel lblPass = new JLabel("Mật khẩu:");
-        JPasswordField txtPass = new JPasswordField();
+        JPasswordField txtPass = new JPasswordField("123456");
 
         JButton btnLogin = new JButton("Đăng nhập");
         JButton btnSignUp = new JButton("Đăng ký");
