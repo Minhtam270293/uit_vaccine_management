@@ -4,11 +4,15 @@ import java.awt.event.ActionEvent;
 import java.util.List;
 import java.awt.*;
 
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -19,6 +23,8 @@ import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
 import com.uit.vaccinemanagement.dao.NguoiDungDAO;
@@ -41,7 +47,7 @@ public class AdminView {
     public void showAdminUI() {
         JFrame frame = new JFrame("Admin Dashboard");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(1100, 500);
+        frame.setSize(1600, 500);
 
         // Left panel (column 1)
         // Side Navigator
@@ -103,38 +109,47 @@ public class AdminView {
         leftPanel.add(buttonPanelLogout);
 
 
-
         // Right panel (column 2)
         JPanel rightPanel = new JPanel(new BorderLayout());
+        // head right pannel
+         // 1. Title  
+        JLabel tableTitle = new JLabel("Thông tin", SwingConstants.CENTER);
+        tableTitle.setFont(new Font("Arial", Font.BOLD, 18));
+        tableTitle.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0)); // padding trên dưới
+            //  2. Search bar  
         JPanel topPanel = new JPanel();
         topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.X_AXIS));
+            // search field
+        JTextField searchField = new JTextField();
+        searchField.setPreferredSize(new Dimension(200, 30));
+        topPanel.add(new JLabel("Tìm kiếm người dùng"));
+        topPanel.add(Box.createHorizontalStrut(5));
+        topPanel.add(searchField);
+        topPanel.add(Box.createHorizontalStrut(20));
+        topPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+            // Buttons download + search
+        JButton btnDownload = new JButton("Tìm kiếm");
+        JButton btnAdd = new JButton("Download");
+        topPanel.add(btnDownload);
+        topPanel.add(Box.createHorizontalStrut(10));
+        topPanel.add(btnAdd);
+            // ======= Wrapper chứa Title + Search =======
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.add(tableTitle, BorderLayout.NORTH);
+        headerPanel.add(topPanel, BorderLayout.SOUTH);
+        // Add vào NORTH
+        rightPanel.add(headerPanel, BorderLayout.NORTH);
 
-        JLabel tableTitle = new JLabel("Thông tin", SwingConstants.CENTER);
-        rightPanel.add(tableTitle, BorderLayout.NORTH);
 
+        // ======= 3. Table dữ liệu =======
         JTable table = new JTable();
         JScrollPane scrollPane = new JScrollPane(table);
         rightPanel.add(scrollPane, BorderLayout.CENTER);
 
-
-
-        // Search bar
-        JTextField searchField = new JTextField();
-        searchField.setPreferredSize(new Dimension(200, 30));
-        topPanel.add(new JLabel("Tìm kiếm người dùng"));
-        topPanel.add(searchField);
-        topPanel.add(Box.createHorizontalStrut(20));
-        // Action buttons
-        JButton btnDownload = new JButton("Tải danh sách");
-        JButton btnAdd = new JButton("Thêm mới");
-        topPanel.add(btnDownload);
-        topPanel.add(btnAdd);
-        rightPanel.add(topPanel, BorderLayout.NORTH);
-
-        // ======= Panel phân trang =======
+        // ======= 4. Phân trang =======
         JPanel paginationPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton btnPrev = new JButton("Trước");
-        JButton btnNext = new JButton("Sau");
+        JButton btnPrev = new JButton("<<");
+        JButton btnNext = new JButton(">>");
         JLabel lblPageInfo = new JLabel("Trang 1/1");
         JLabel lblTotalRows = new JLabel("Tổng số: 1");
 
@@ -148,18 +163,16 @@ public class AdminView {
         // Split pane
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, rightPanel);
         splitPane.setDividerLocation(220);
-
         frame.getContentPane().add(splitPane);
-
-
 
         
         // Người dùng table       
         btnNguoiDung.addActionListener((ActionEvent e) -> {
         tableTitle.setText("Danh sách người dùng");
+        tableTitle.setFont(new Font("Arial", Font.BOLD, 18));
         List<NguoiDung> userList = nguoiDungDAO.getAllNguoiDung();
 
-        String[] columns = {"Mã ND", "Họ Tên", "Tên đăng nhập", "Email", "Vai trò", "Ngày tạo", "Ngày sinh", "Giới tính"};
+        String[] columns = {"Mã ND", "Họ Tên", "Tên đăng nhập", "Email", "Vai trò", "Ngày tạo", "Ngày sinh", "Giới tính", "Thao tác"};
         DefaultTableModel model = new DefaultTableModel(columns, 0);
 
         // Đổ dữ liệu vào model
@@ -172,15 +185,83 @@ public class AdminView {
                 nd.getVaiTro(),
                 nd.getNgayTao(),
                 nd.getNgaySinh(),
-                nd.getGioiTinh()
+                nd.getGioiTinh(),
+                "Thao tác" // placeholder
             });
         }
 
         JTable newTable = new JTable(model);
-        newTable.setFillsViewportHeight(true);
-        newTable.setRowHeight(25);
-        newTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-        newTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        newTable.setRowHeight(30);
+
+        // ===== Custom renderer + editor cho cột thao tác =====
+        TableColumn actionColumn = newTable.getColumnModel().getColumn(8);
+
+        actionColumn.setCellRenderer(new TableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value,
+                    boolean isSelected, boolean hasFocus, int row, int column) {
+
+                JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
+                JButton btnEdit = new JButton("✎");   // icon edit
+                JButton btnDelete = new JButton("🗑"); // icon delete
+
+                btnEdit.setPreferredSize(new Dimension(50, 25));
+                btnDelete.setPreferredSize(new Dimension(50, 25));
+
+                panel.add(btnEdit);
+                panel.add(btnDelete);
+
+                return panel;
+            }
+        });
+
+        // Editor (để bắt sự kiện click)
+        actionColumn.setCellEditor(new DefaultCellEditor(new JCheckBox()) {
+            JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
+            JButton btnEdit = new JButton("✎");
+            JButton btnDelete = new JButton("🗑");
+
+            {
+                btnEdit.setPreferredSize(new Dimension(50, 25));
+                btnDelete.setPreferredSize(new Dimension(50, 25));
+
+                panel.add(btnEdit);
+                panel.add(btnDelete);
+
+                // Sự kiện Edit
+                btnEdit.addActionListener(e -> {
+                    int row = newTable.getSelectedRow();
+                    if (row != -1) {
+                        String maNguoiDung = newTable.getValueAt(row, 0).toString();
+                        JOptionPane.showMessageDialog(frame, "Edit user: " + maNguoiDung);
+                        // TODO: mở form edit user
+                    }
+                });
+
+                // Sự kiện Delete
+                btnDelete.addActionListener(e -> {
+                    int row = newTable.getSelectedRow();
+                    if (row != -1) {
+                        String maNguoiDung = newTable.getValueAt(row, 0).toString();
+                        int confirm = JOptionPane.showConfirmDialog(frame, "Xóa user " + maNguoiDung + " ?", "Xác nhận", JOptionPane.YES_NO_OPTION);
+                        if (confirm == JOptionPane.YES_OPTION) {
+                            // TODO: gọi DAO xóa user
+                            ((DefaultTableModel)newTable.getModel()).removeRow(row);
+                        }
+                    }
+                });
+            }
+
+            @Override
+            public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+                return panel;
+            }
+
+            @Override
+            public Object getCellEditorValue() {
+                return "";
+            }
+        });
 
         JTableHeader header = newTable.getTableHeader();
         header.setFont(new Font("Arial", Font.BOLD, 14));
@@ -208,11 +289,10 @@ public class AdminView {
 
         JScrollPane newScrollPane = new JScrollPane(newTable);
         rightPanel.removeAll();
-        rightPanel.add(tableTitle, BorderLayout.NORTH);
         rightPanel.add(newScrollPane, BorderLayout.CENTER);
         rightPanel.revalidate();
         rightPanel.repaint();
-        rightPanel.add(topPanel, BorderLayout.NORTH);
+        rightPanel.add(headerPanel, BorderLayout.NORTH);
         rightPanel.add(paginationPanel, BorderLayout.SOUTH);
     });
 
@@ -270,11 +350,10 @@ public class AdminView {
         // Đưa vào ScrollPane
         JScrollPane newScrollPane = new JScrollPane(newTable);
         rightPanel.removeAll();
-        rightPanel.add(tableTitle, BorderLayout.NORTH);
+        rightPanel.add(headerPanel, BorderLayout.NORTH);
         rightPanel.add(newScrollPane, BorderLayout.CENTER);
         rightPanel.revalidate();
         rightPanel.repaint();
-        rightPanel.add(topPanel, BorderLayout.NORTH);
         rightPanel.add(paginationPanel, BorderLayout.SOUTH);
     });
 
@@ -323,11 +402,10 @@ public class AdminView {
         // Đưa vào ScrollPane
         JScrollPane newScrollPane = new JScrollPane(newTable);
         rightPanel.removeAll();
-        rightPanel.add(tableTitle, BorderLayout.NORTH);
+        rightPanel.add(headerPanel, BorderLayout.NORTH);
         rightPanel.add(newScrollPane, BorderLayout.CENTER);
         rightPanel.revalidate();
         rightPanel.repaint();
-        rightPanel.add(topPanel, BorderLayout.NORTH);
         rightPanel.add(paginationPanel, BorderLayout.SOUTH);
     });
 

@@ -189,35 +189,46 @@ public class BacSiView {
 
         // Right panel (column 2)
         JPanel rightPanel = new JPanel(new BorderLayout());
+        // ======= 1. Title =======
+        JLabel tableTitle = new JLabel("Thông tin", SwingConstants.CENTER);
+        tableTitle.setFont(new Font("Arial", Font.BOLD, 18));
+        tableTitle.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0)); // padding trên dưới
+        // ======= 2. Search bar =======
         JPanel topPanel = new JPanel();
         topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.X_AXIS));
-
-        JLabel tableTitle = new JLabel("Thông tin", SwingConstants.CENTER);
-        rightPanel.add(tableTitle, BorderLayout.NORTH);
-
-        JTable table = new JTable();
-        JScrollPane scrollPane = new JScrollPane(table);
-        rightPanel.add(scrollPane, BorderLayout.CENTER);
-
-
-
-        // Search bar
+        //
         JTextField searchField = new JTextField();
         searchField.setPreferredSize(new Dimension(200, 30));
         topPanel.add(new JLabel("Tìm kiếm người dùng"));
+        topPanel.add(Box.createHorizontalStrut(5));
         topPanel.add(searchField);
         topPanel.add(Box.createHorizontalStrut(20));
+        topPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+
         // Action buttons
         JButton btnDownload = new JButton("Tải danh sách");
         JButton btnAdd = new JButton("Thêm mới");
         topPanel.add(btnDownload);
+        topPanel.add(Box.createHorizontalStrut(10));
         topPanel.add(btnAdd);
-        rightPanel.add(topPanel, BorderLayout.NORTH);
 
-        // ======= Panel phân trang =======
+        // ======= Wrapper chứa Title + Search =======
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.add(tableTitle, BorderLayout.NORTH);
+        headerPanel.add(topPanel, BorderLayout.SOUTH);
+
+        // Add vào NORTH
+        rightPanel.add(headerPanel, BorderLayout.NORTH);
+
+        // ======= 3. Table dữ liệu =======
+        JTable table = new JTable();
+        JScrollPane scrollPane = new JScrollPane(table);
+        rightPanel.add(scrollPane, BorderLayout.CENTER);
+
+        // ======= 4. Phân trang =======
         JPanel paginationPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton btnPrev = new JButton("Trước");
-        JButton btnNext = new JButton("Sau");
+        JButton btnPrev = new JButton("<<");
+        JButton btnNext = new JButton(">>");
         JLabel lblPageInfo = new JLabel("Trang 1/1");
         JLabel lblTotalRows = new JLabel("Tổng số: 1");
 
@@ -231,7 +242,6 @@ public class BacSiView {
         // Split pane
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, rightPanel);
         splitPane.setDividerLocation(220);
-
         frame.getContentPane().add(splitPane);
 
 
@@ -283,11 +293,10 @@ public class BacSiView {
         // Thay bảng mới vào rightPanel
         JScrollPane newScrollPane = new JScrollPane(newTable);
         rightPanel.removeAll();
-        rightPanel.add(tableTitle, BorderLayout.NORTH);
+        rightPanel.add(headerPanel, BorderLayout.NORTH);
         rightPanel.add(newScrollPane, BorderLayout.CENTER);
         rightPanel.revalidate();
         rightPanel.repaint();
-        rightPanel.add(topPanel, BorderLayout.NORTH);
         rightPanel.add(paginationPanel, BorderLayout.SOUTH);
     });
 
@@ -352,11 +361,10 @@ public class BacSiView {
 
         // Replace table trên giao diện
         rightPanel.removeAll();
-        rightPanel.add(tableTitle, BorderLayout.NORTH);
+        rightPanel.add(headerPanel, BorderLayout.NORTH);
         rightPanel.add(newScrollPane, BorderLayout.CENTER);
         rightPanel.revalidate();
         rightPanel.repaint();
-        rightPanel.add(topPanel, BorderLayout.NORTH);
         rightPanel.add(paginationPanel, BorderLayout.SOUTH);
     });
 
