@@ -21,9 +21,9 @@ public class AuthView {
         panel.setLayout(new GridLayout(3, 2, 5, 5));
 
         JLabel lblEmail = new JLabel("Email:");
-        JTextField txtEmail = new JTextField("admin@gmail.com");
-        // JTextField txtEmail = new JTextField("bacsi@gmail.com");
-        // JTextField txtEmail = new JTextField("khach@gmail.com");
+        // JTextField txtEmail = new JTextField("admin@example.com");
+        JTextField txtEmail = new JTextField("bacsiA@example.com");
+        // JTextField txtEmail = new JTextField("khachB@example.com");
         JLabel lblPass = new JLabel("Mật khẩu:");
         JPasswordField txtPass = new JPasswordField("123456");
 
