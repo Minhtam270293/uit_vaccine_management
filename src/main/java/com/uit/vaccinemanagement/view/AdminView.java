@@ -162,6 +162,7 @@ public class AdminView {
         splitPane.setDividerLocation(220);
         frame.getContentPane().add(splitPane);
 
+        // -------------------------------------------------------------------------------------------------------------------------
         // Người dùng table
         btnNguoiDung.addActionListener((ActionEvent e) -> {
             tableTitle.setText("Danh sách người dùng");
@@ -198,15 +199,14 @@ public class AdminView {
                         boolean isSelected, boolean hasFocus, int row, int column) {
 
                     JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
-                    JButton btnEdit = new JButton("✎");   // icon edit
-                    JButton btnDelete = new JButton("🗑"); // icon delete
+                    JButton btnEdit = new JButton("✎");    
+                    JButton btnDelete = new JButton("🗑"); 
 
                     btnEdit.setPreferredSize(new Dimension(50, 25));
                     btnDelete.setPreferredSize(new Dimension(50, 25));
 
                     panel.add(btnEdit);
                     panel.add(btnDelete);
-
                     return panel;
                 }
             });
@@ -354,18 +354,21 @@ public class AdminView {
             List<Object[]> vaccineList = vaccineDAO.getAllVaccineAsObjectArray();
             String[] columns = {"Mã Vaccine", "Tên Vaccine", "Số lô", "Ngày SX", "Ngày hết hạn",
                 "Tổng SL", "SL còn lại", "Giá nhập", "Giá bán",
-                "Mã bệnh", "Mã NSX", "Ngày tạo"};
+                "Mã bệnh", "Mã NSX", "Ngày tạo", "Thao tác"}; // thêm cột Thao tác
 
             DefaultTableModel model = new DefaultTableModel(columns, 0);
             for (Object[] row : vaccineList) {
-                model.addRow(row);
+                Object[] newRow = new Object[row.length + 1];
+                System.arraycopy(row, 0, newRow, 0, row.length);
+                newRow[row.length] = "Thao tác"; // placeholder
+                model.addRow(newRow);
             }
 
             JTable newTable = new JTable(model);
 
             // Tùy chỉnh bảng
             newTable.setFillsViewportHeight(true);
-            newTable.setRowHeight(25);
+            newTable.setRowHeight(30);
             newTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
             newTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
@@ -386,16 +389,89 @@ public class AdminView {
             columnModel.getColumn(9).setPreferredWidth(80);   // Mã bệnh
             columnModel.getColumn(10).setPreferredWidth(80);  // Mã NSX
             columnModel.getColumn(11).setPreferredWidth(100); // Ngày tạo
+            columnModel.getColumn(12).setPreferredWidth(120); // Thao tác
 
             // Renderer căn giữa
             DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
             centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
 
-            // Căn giữa các cột số
             int[] centerCols = {0, 2, 5, 6, 7, 8, 9, 10};
             for (int col : centerCols) {
                 newTable.getColumnModel().getColumn(col).setCellRenderer(centerRenderer);
             }
+
+            // ===== Custom renderer + editor cho cột thao tác =====
+            TableColumn actionColumn = newTable.getColumnModel().getColumn(12);
+
+            actionColumn.setCellRenderer(new TableCellRenderer() {
+                @Override
+                public Component getTableCellRendererComponent(JTable table, Object value,
+                                                            boolean isSelected, boolean hasFocus, int row, int column) {
+                    JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
+                    JButton btnEdit = new JButton("✎");
+                    JButton btnDelete = new JButton("🗑");
+
+                    btnEdit.setPreferredSize(new Dimension(50, 25));
+                    btnDelete.setPreferredSize(new Dimension(50, 25));
+
+                    panel.add(btnEdit);
+                    panel.add(btnDelete);
+                    return panel;
+                }
+            });
+
+            // Editor (bắt sự kiện click)
+            actionColumn.setCellEditor(new DefaultCellEditor(new JCheckBox()) {
+                JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
+                JButton btnEdit = new JButton("✎");
+                JButton btnDelete = new JButton("🗑");
+
+                {
+                    btnEdit.setPreferredSize(new Dimension(50, 25));
+                    btnDelete.setPreferredSize(new Dimension(50, 25));
+
+                    panel.add(btnEdit);
+                    panel.add(btnDelete);
+
+                    // Sự kiện Edit
+                    btnEdit.addActionListener(ev -> {
+                        int row = newTable.getSelectedRow();
+                        if (row != -1) {
+                            String maVaccine = newTable.getValueAt(row, 0).toString();
+                            // TODO: lấy Vaccine từ DAO theo maVaccine và mở form chỉnh sửa
+                            JOptionPane.showMessageDialog(frame, "Edit vaccine: " + maVaccine);
+                        }
+                    });
+
+                    // Sự kiện Delete
+                    btnDelete.addActionListener(ev -> {
+                        int row = newTable.getSelectedRow();
+                        if (row != -1) {
+                            String maVaccine = newTable.getValueAt(row, 0).toString();
+                            int confirm = JOptionPane.showConfirmDialog(frame, "Xóa vaccine " + maVaccine + " ?", "Xác nhận", JOptionPane.YES_NO_OPTION);
+                            if (confirm == JOptionPane.YES_OPTION) {
+                                boolean success = vaccineDAO.deleteVaccine(maVaccine);
+                                if (success) {
+                                    JOptionPane.showMessageDialog(frame, "Xóa thành công!");
+                                    btnVaccine.doClick();
+                                } else {
+                                    JOptionPane.showMessageDialog(frame, "Xóa thất bại!");
+                                }
+                            }
+                        }
+                    });
+                }
+
+                @Override
+                public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+                    return panel;
+                }
+
+                @Override
+                public Object getCellEditorValue() {
+                    return "";
+                }
+            });
 
             // Đưa vào ScrollPane
             JScrollPane newScrollPane = new JScrollPane(newTable);
@@ -407,22 +483,26 @@ public class AdminView {
             rightPanel.add(paginationPanel, BorderLayout.SOUTH);
         });
 
+
         // Nhà Sản Xuất table
         btnNhaSanXuat.addActionListener((ActionEvent e) -> {
             tableTitle.setText("Danh sách nhà sản xuất");
             List<Object[]> nsxList = nhaSanXuatDAO.getAllNhaSanXuatAsObjectArray();
-            String[] columns = {"Mã NSX", "Tên nhà sản xuất", "Quốc gia", "Ngày tạo"};
+            String[] columns = {"Mã NSX", "Tên nhà sản xuất", "Quốc gia", "Ngày tạo", "Thao tác"}; // thêm cột Thao tác
 
             DefaultTableModel model = new DefaultTableModel(columns, 0);
             for (Object[] row : nsxList) {
-                model.addRow(row);
+                Object[] newRow = new Object[row.length + 1];
+                System.arraycopy(row, 0, newRow, 0, row.length);
+                newRow[row.length] = "Thao tác"; // placeholder
+                model.addRow(newRow);
             }
 
             JTable newTable = new JTable(model);
 
             // Tuỳ chỉnh chung
             newTable.setFillsViewportHeight(true);
-            newTable.setRowHeight(25);
+            newTable.setRowHeight(30);
             newTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
             newTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
@@ -436,6 +516,7 @@ public class AdminView {
             columnModel.getColumn(1).setPreferredWidth(200);  // Tên NSX
             columnModel.getColumn(2).setPreferredWidth(120);  // Quốc gia
             columnModel.getColumn(3).setPreferredWidth(100);  // Ngày tạo
+            columnModel.getColumn(4).setPreferredWidth(120);  // Thao tác
 
             // Renderer căn giữa
             DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
@@ -447,6 +528,79 @@ public class AdminView {
                 newTable.getColumnModel().getColumn(col).setCellRenderer(centerRenderer);
             }
 
+            // ===== Custom renderer + editor cho cột thao tác =====
+            TableColumn actionColumn = newTable.getColumnModel().getColumn(4);
+
+            actionColumn.setCellRenderer(new TableCellRenderer() {
+                @Override
+                public Component getTableCellRendererComponent(JTable table, Object value,
+                                                            boolean isSelected, boolean hasFocus, int row, int column) {
+                    JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
+                    JButton btnEdit = new JButton("✎");
+                    JButton btnDelete = new JButton("🗑");
+
+                    btnEdit.setPreferredSize(new Dimension(50, 25));
+                    btnDelete.setPreferredSize(new Dimension(50, 25));
+
+                    panel.add(btnEdit);
+                    panel.add(btnDelete);
+                    return panel;
+                }
+            });
+
+            // Editor (bắt sự kiện click)
+            actionColumn.setCellEditor(new DefaultCellEditor(new JCheckBox()) {
+                JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
+                JButton btnEdit = new JButton("✎");
+                JButton btnDelete = new JButton("🗑");
+
+                {
+                    btnEdit.setPreferredSize(new Dimension(50, 25));
+                    btnDelete.setPreferredSize(new Dimension(50, 25));
+
+                    panel.add(btnEdit);
+                    panel.add(btnDelete);
+
+                    // Sự kiện Edit
+                    btnEdit.addActionListener(ev -> {
+                        int row = newTable.getSelectedRow();
+                        if (row != -1) {
+                            String maNSX = newTable.getValueAt(row, 0).toString();
+                            // TODO: lấy NhaSanXuat từ DAO theo maNSX và mở form chỉnh sửa
+                            JOptionPane.showMessageDialog(frame, "Edit NSX: " + maNSX);
+                        }
+                    });
+
+                    // Sự kiện Delete
+                    btnDelete.addActionListener(ev -> {
+                        int row = newTable.getSelectedRow();
+                        if (row != -1) {
+                            String maNSX = newTable.getValueAt(row, 0).toString();
+                            int confirm = JOptionPane.showConfirmDialog(frame, "Xóa NSX " + maNSX + " ?", "Xác nhận", JOptionPane.YES_NO_OPTION);
+                            if (confirm == JOptionPane.YES_OPTION) {
+                                boolean success = nhaSanXuatDAO.deleteNhaSanXuat(maNSX);
+                                if (success) {
+                                    JOptionPane.showMessageDialog(frame, "Xóa thành công!");
+                                    btnNhaSanXuat.doClick();
+                                } else {
+                                    JOptionPane.showMessageDialog(frame, "Xóa thất bại!");
+                                }
+                            }
+                        }
+                    });
+                }
+
+                @Override
+                public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+                    return panel;
+                }
+
+                @Override
+                public Object getCellEditorValue() {
+                    return "";
+                }
+            });
+
             // Đưa vào ScrollPane
             JScrollPane newScrollPane = new JScrollPane(newTable);
             rightPanel.removeAll();
@@ -456,6 +610,7 @@ public class AdminView {
             rightPanel.repaint();
             rightPanel.add(paginationPanel, BorderLayout.SOUTH);
         });
+
 
         frame.setVisible(true);
     }

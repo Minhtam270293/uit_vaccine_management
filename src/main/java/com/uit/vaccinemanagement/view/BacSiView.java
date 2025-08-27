@@ -10,6 +10,8 @@ import com.uit.vaccinemanagement.view.SharedComponents;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
 import java.awt.*;
@@ -246,128 +248,285 @@ public class BacSiView {
 
 
 
+        // -----------------------------------------------------------------------------------------------------------
         // Danh sách tiêm chủng
         btnTiemChung.addActionListener((ActionEvent e) -> {
-        tableTitle.setText("Danh sách tiêm chủng");
-        List<Object[]> data = tiemChungDAO.getByMaBacSi(currentUser.getMaNguoiDung());
+            tableTitle.setText("Danh sách tiêm chủng");
+            List<Object[]> data = tiemChungDAO.getByMaBacSi(currentUser.getMaNguoiDung());
 
-        // Cột
-        String[] columns = {"Mã TC", "Ngày tiêm", "Mã vaccine", "Mã bác sĩ", "Mã khách", "Trạng thái", "Ghi chú"};
-        DefaultTableModel model = new DefaultTableModel(columns, 0);
+            // Cột
+            String[] columns = {"Mã TC", "Ngày tiêm", "Mã vaccine", "Mã bác sĩ", "Mã khách", "Trạng thái", "Ghi chú", "Thao tác"};
+            DefaultTableModel model = new DefaultTableModel(columns, 0);
 
-        // Đổ dữ liệu
-        for (Object[] row : data) {
-            model.addRow(row);
-        }
+            // Đổ dữ liệu
+            for (Object[] row : data) {
+                Object[] newRow = new Object[row.length + 1];
+                System.arraycopy(row, 0, newRow, 0, row.length);
+                newRow[row.length] = "Thao tác"; // placeholder
+                model.addRow(newRow);
+            }
 
-        JTable newTable = new JTable(model);
-        newTable.setFillsViewportHeight(true);
-        newTable.setRowHeight(25);
-        newTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-        newTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+            JTable newTable = new JTable(model);
+            newTable.setFillsViewportHeight(true);
+            newTable.setRowHeight(30);
+            newTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+            newTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-        // Header
-        JTableHeader header = newTable.getTableHeader();
-        header.setFont(new Font("Arial", Font.BOLD, 14));
-        header.setReorderingAllowed(false);
-        header.setResizingAllowed(true);
+            // Header
+            JTableHeader header = newTable.getTableHeader();
+            header.setFont(new Font("Arial", Font.BOLD, 14));
+            header.setReorderingAllowed(false);
+            header.setResizingAllowed(true);
 
-        // Set width từng cột
-        TableColumnModel columnModel = newTable.getColumnModel();
-        columnModel.getColumn(0).setPreferredWidth(60);   // Mã TC
-        columnModel.getColumn(1).setPreferredWidth(100);  // Ngày tiêm
-        columnModel.getColumn(2).setPreferredWidth(100);  // Mã vaccine
-        columnModel.getColumn(3).setPreferredWidth(100);  // Mã bác sĩ
-        columnModel.getColumn(4).setPreferredWidth(100);  // Mã khách
-        columnModel.getColumn(5).setPreferredWidth(120);  // Trạng thái
-        columnModel.getColumn(6).setPreferredWidth(200);  // Ghi chú
+            // Set width từng cột
+            TableColumnModel columnModel = newTable.getColumnModel();
+            columnModel.getColumn(0).setPreferredWidth(60);   // Mã TC
+            columnModel.getColumn(1).setPreferredWidth(100);  // Ngày tiêm
+            columnModel.getColumn(2).setPreferredWidth(100);  // Mã vaccine
+            columnModel.getColumn(3).setPreferredWidth(100);  // Mã bác sĩ
+            columnModel.getColumn(4).setPreferredWidth(100);  // Mã khách
+            columnModel.getColumn(5).setPreferredWidth(120);  // Trạng thái
+            columnModel.getColumn(6).setPreferredWidth(200);  // Ghi chú
+            columnModel.getColumn(7).setPreferredWidth(120);  // Thao tác
 
-        // Renderer căn giữa cho mấy cột mã
-        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
-        newTable.getColumnModel().getColumn(0).setCellRenderer(centerRenderer); // Mã TC
-        newTable.getColumnModel().getColumn(2).setCellRenderer(centerRenderer); // Mã vaccine
-        newTable.getColumnModel().getColumn(3).setCellRenderer(centerRenderer); // Mã bác sĩ
-        newTable.getColumnModel().getColumn(4).setCellRenderer(centerRenderer); // Mã khách
+            // Renderer căn giữa cho mấy cột mã
+            DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+            centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+            newTable.getColumnModel().getColumn(0).setCellRenderer(centerRenderer); // Mã TC
+            newTable.getColumnModel().getColumn(2).setCellRenderer(centerRenderer); // Mã vaccine
+            newTable.getColumnModel().getColumn(3).setCellRenderer(centerRenderer); // Mã bác sĩ
+            newTable.getColumnModel().getColumn(4).setCellRenderer(centerRenderer); // Mã khách
 
-        // Thay bảng mới vào rightPanel
-        JScrollPane newScrollPane = new JScrollPane(newTable);
-        rightPanel.removeAll();
-        rightPanel.add(headerPanel, BorderLayout.NORTH);
-        rightPanel.add(newScrollPane, BorderLayout.CENTER);
-        rightPanel.revalidate();
-        rightPanel.repaint();
-        rightPanel.add(paginationPanel, BorderLayout.SOUTH);
-    });
+            // ===== Custom renderer + editor cho cột thao tác =====
+            TableColumn actionColumn = newTable.getColumnModel().getColumn(7);
 
+            actionColumn.setCellRenderer(new TableCellRenderer() {
+                @Override
+                public Component getTableCellRendererComponent(JTable table, Object value,
+                                                            boolean isSelected, boolean hasFocus, int row, int column) {
+                    JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
+                    JButton btnEdit = new JButton("✎");
+                    JButton btnDelete = new JButton("🗑");
+
+                    btnEdit.setPreferredSize(new Dimension(50, 25));
+                    btnDelete.setPreferredSize(new Dimension(50, 25));
+
+                    panel.add(btnEdit);
+                    panel.add(btnDelete);
+                    return panel;
+                }
+            });
+
+            actionColumn.setCellEditor(new DefaultCellEditor(new JCheckBox()) {
+                JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
+                JButton btnEdit = new JButton("✎");
+                JButton btnDelete = new JButton("🗑");
+
+                {
+                    btnEdit.setPreferredSize(new Dimension(50, 25));
+                    btnDelete.setPreferredSize(new Dimension(50, 25));
+
+                    panel.add(btnEdit);
+                    panel.add(btnDelete);
+
+                    // Sự kiện Edit
+                    btnEdit.addActionListener(ev -> {
+                        int row = newTable.getSelectedRow();
+                        if (row != -1) {
+                            String maTC = newTable.getValueAt(row, 0).toString();
+                            // TODO: Lấy đối tượng TiemChung từ DAO theo maTC và mở form edit
+                            JOptionPane.showMessageDialog(frame, "Edit Tiêm chủng: " + maTC);
+                        }
+                    });
+
+                    // Sự kiện Delete
+                    btnDelete.addActionListener(ev -> {
+                        int row = newTable.getSelectedRow();
+                        if (row != -1) {
+                            String maTC = newTable.getValueAt(row, 0).toString();
+                            int confirm = JOptionPane.showConfirmDialog(frame, "Xóa tiêm chủng " + maTC + " ?", "Xác nhận", JOptionPane.YES_NO_OPTION);
+                            if (confirm == JOptionPane.YES_OPTION) {
+                                boolean success = tiemChungDAO.deleteTiemChung(maTC);
+                                if (success) {
+                                    JOptionPane.showMessageDialog(frame, "Xóa thành công!");
+                                    btnTiemChung.doClick();
+                                } else {
+                                    JOptionPane.showMessageDialog(frame, "Xóa thất bại!");
+                                }
+                            }
+                        }
+                    });
+
+                }
+
+                @Override
+                public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+                    return panel;
+                }
+
+                @Override
+                public Object getCellEditorValue() {
+                    return "";
+                }
+            });
+
+            
+            // Thay bảng mới vào rightPanel
+            JScrollPane newScrollPane = new JScrollPane(newTable);
+            rightPanel.removeAll();
+            rightPanel.add(headerPanel, BorderLayout.NORTH);
+            rightPanel.add(newScrollPane, BorderLayout.CENTER);
+            rightPanel.revalidate();
+            rightPanel.repaint();
+            rightPanel.add(paginationPanel, BorderLayout.SOUTH);
+        });
 
 
         // Danh sách khách hàng
         btnKhachHang.addActionListener((ActionEvent e) -> {
-        tableTitle.setText("Danh sách khách hàng");
-        List<NguoiDung> khachList = nguoiDungDAO.getAllNguoiDung();
+            tableTitle.setText("Danh sách khách hàng");
+            List<NguoiDung> khachList = nguoiDungDAO.getAllNguoiDung();
 
-        String[] columns = {"Mã KH", "Họ Tên", "Tên đăng nhập", "Email", "Vai trò", "Ngày tạo", "Ngày sinh", "Giới tính"};
-        DefaultTableModel model = new DefaultTableModel(columns, 0);
+            String[] columns = {"Mã KH", "Họ Tên", "Tên đăng nhập", "Email", "Vai trò", "Ngày tạo", "Ngày sinh", "Giới tính", "Thao tác"};
+            DefaultTableModel model = new DefaultTableModel(columns, 0);
 
-        // Chỉ lấy những người có vai trò = KHÁCH
-        for (NguoiDung nd : khachList) {
-            if (nd.getVaiTro().name().equalsIgnoreCase("khach")) {
-                model.addRow(new Object[]{
-                    nd.getMaNguoiDung(),
-                    nd.getHoTen(),
-                    nd.getTenDangNhap(),
-                    nd.getEmail(),
-                    nd.getVaiTro(),
-                    nd.getNgayTao(),
-                    nd.getNgaySinh(),
-                    nd.getGioiTinh()
-                });
+            // Chỉ lấy những người có vai trò = KHÁCH
+            for (NguoiDung nd : khachList) {
+                if (nd.getVaiTro().name().equalsIgnoreCase("khach")) {
+                    model.addRow(new Object[]{
+                        nd.getMaNguoiDung(),
+                        nd.getHoTen(),
+                        nd.getTenDangNhap(),
+                        nd.getEmail(),
+                        nd.getVaiTro(),
+                        nd.getNgayTao(),
+                        nd.getNgaySinh(),
+                        nd.getGioiTinh(),
+                        "Thao tác" // placeholder
+                    });
+                }
             }
-        }
 
-        JTable newTable = new JTable(model);
-        newTable.setFillsViewportHeight(true);
-        newTable.setRowHeight(25);
-        newTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-        newTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+            JTable newTable = new JTable(model);
+            newTable.setFillsViewportHeight(true);
+            newTable.setRowHeight(30);
+            newTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+            newTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-        // Header style
-        JTableHeader header = newTable.getTableHeader();
-        header.setFont(new Font("Arial", Font.BOLD, 14));
-        header.setReorderingAllowed(false);
-        header.setResizingAllowed(true);
+            // Header style
+            JTableHeader header = newTable.getTableHeader();
+            header.setFont(new Font("Arial", Font.BOLD, 14));
+            header.setReorderingAllowed(false);
+            header.setResizingAllowed(true);
 
-        // Set độ rộng cột
-        TableColumnModel columnModel = newTable.getColumnModel();
-        columnModel.getColumn(0).setPreferredWidth(60);   // Mã KH
-        columnModel.getColumn(1).setPreferredWidth(120);  // Họ Tên
-        columnModel.getColumn(2).setPreferredWidth(120);  // Tên đăng nhập
-        columnModel.getColumn(3).setPreferredWidth(200);  // Email
-        columnModel.getColumn(4).setPreferredWidth(80);   // Vai trò
-        columnModel.getColumn(5).setPreferredWidth(100);  // Ngày tạo
-        columnModel.getColumn(6).setPreferredWidth(100);  // Ngày sinh
-        columnModel.getColumn(7).setPreferredWidth(80);   // Giới tính
+            // Set độ rộng cột
+            TableColumnModel columnModel = newTable.getColumnModel();
+            columnModel.getColumn(0).setPreferredWidth(60);   // Mã KH
+            columnModel.getColumn(1).setPreferredWidth(120);  // Họ Tên
+            columnModel.getColumn(2).setPreferredWidth(120);  // Tên đăng nhập
+            columnModel.getColumn(3).setPreferredWidth(200);  // Email
+            columnModel.getColumn(4).setPreferredWidth(80);   // Vai trò
+            columnModel.getColumn(5).setPreferredWidth(100);  // Ngày tạo
+            columnModel.getColumn(6).setPreferredWidth(100);  // Ngày sinh
+            columnModel.getColumn(7).setPreferredWidth(80);   // Giới tính
+            columnModel.getColumn(8).setPreferredWidth(120);  // Thao tác
 
-        // Renderer căn giữa cho mấy cột mã + vai trò + giới tính
-        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
-        newTable.getColumnModel().getColumn(0).setCellRenderer(centerRenderer); // Mã KH
-        newTable.getColumnModel().getColumn(4).setCellRenderer(centerRenderer); // Vai trò
-        newTable.getColumnModel().getColumn(6).setCellRenderer(centerRenderer); // Ngày sinh
-        newTable.getColumnModel().getColumn(7).setCellRenderer(centerRenderer); // Giới tính
+            // Renderer căn giữa cho mấy cột mã + vai trò + ngày sinh + giới tính
+            DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+            centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+            newTable.getColumnModel().getColumn(0).setCellRenderer(centerRenderer); // Mã KH
+            newTable.getColumnModel().getColumn(4).setCellRenderer(centerRenderer); // Vai trò
+            newTable.getColumnModel().getColumn(6).setCellRenderer(centerRenderer); // Ngày sinh
+            newTable.getColumnModel().getColumn(7).setCellRenderer(centerRenderer); // Giới tính
 
-        JScrollPane newScrollPane = new JScrollPane(newTable);
+            // ===== Custom renderer + editor cho cột thao tác =====
+            TableColumn actionColumn = newTable.getColumnModel().getColumn(8);
 
-        // Replace table trên giao diện
-        rightPanel.removeAll();
-        rightPanel.add(headerPanel, BorderLayout.NORTH);
-        rightPanel.add(newScrollPane, BorderLayout.CENTER);
-        rightPanel.revalidate();
-        rightPanel.repaint();
-        rightPanel.add(paginationPanel, BorderLayout.SOUTH);
-    });
+            actionColumn.setCellRenderer(new TableCellRenderer() {
+                @Override
+                public Component getTableCellRendererComponent(JTable table, Object value,
+                                                            boolean isSelected, boolean hasFocus, int row, int column) {
+                    JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
+                    JButton btnEdit = new JButton("✎");
+                    JButton btnDelete = new JButton("🗑");
 
+                    btnEdit.setPreferredSize(new Dimension(50, 25));
+                    btnDelete.setPreferredSize(new Dimension(50, 25));
+
+                    panel.add(btnEdit);
+                    panel.add(btnDelete);
+                    return panel;
+                }
+            });
+
+            actionColumn.setCellEditor(new DefaultCellEditor(new JCheckBox()) {
+                JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
+                JButton btnEdit = new JButton("✎");
+                JButton btnDelete = new JButton("🗑");
+
+                {
+                    btnEdit.setPreferredSize(new Dimension(50, 25));
+                    btnDelete.setPreferredSize(new Dimension(50, 25));
+
+                    panel.add(btnEdit);
+                    panel.add(btnDelete);
+
+                    // Sự kiện Edit
+                    btnEdit.addActionListener(ev -> {
+                        int row = newTable.getSelectedRow();
+                        if (row != -1) {
+                            String maKH = newTable.getValueAt(row, 0).toString();
+                            NguoiDung khach = nguoiDungDAO.getAllNguoiDung().stream()
+                                    .filter(u -> u.getMaNguoiDung().equals(maKH))
+                                    .findFirst().orElse(null);
+
+                            if (khach != null) {
+                                // TODO: mở dialog edit khách hàng (giống edit người dùng)
+                                JOptionPane.showMessageDialog(frame, "Edit Khách hàng: " + maKH);
+                            }
+                        }
+                    });
+
+                    // Sự kiện Delete
+                    btnDelete.addActionListener(ev -> {
+                        int row = newTable.getSelectedRow();
+                        if (row != -1) {
+                            String maKH = newTable.getValueAt(row, 0).toString();
+                            int confirm = JOptionPane.showConfirmDialog(frame, "Xóa khách hàng " + maKH + " ?", "Xác nhận", JOptionPane.YES_NO_OPTION);
+                            if (confirm == JOptionPane.YES_OPTION) {
+                                boolean success = nguoiDungDAO.deleteNguoiDung(maKH);
+                                if (success) {
+                                    JOptionPane.showMessageDialog(frame, "Xóa thành công!");
+                                    btnKhachHang.doClick();
+                                } else {
+                                    JOptionPane.showMessageDialog(frame, "Xóa thất bại!");
+                                }
+                            }
+                        }
+                    });
+                }
+
+                @Override
+                public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+                    return panel;
+                }
+
+                @Override
+                public Object getCellEditorValue() {
+                    return "";
+                }
+            });
+
+            JScrollPane newScrollPane = new JScrollPane(newTable);
+
+            // Replace table trên giao diện
+            rightPanel.removeAll();
+            rightPanel.add(headerPanel, BorderLayout.NORTH);
+            rightPanel.add(newScrollPane, BorderLayout.CENTER);
+            rightPanel.revalidate();
+            rightPanel.repaint();
+            rightPanel.add(paginationPanel, BorderLayout.SOUTH);
+        });
 
         frame.setVisible(true);
     }
