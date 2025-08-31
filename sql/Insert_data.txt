@@ -1,3 +1,8 @@
+INSERT INTO `Nguoi_Dung` (`ma_nguoi_dung`, `ho_ten`, `ten_dang_nhap`, `email`, `mat_khau`, `vai_tro`, `ngay_tao`, `ngay_sinh`, `gioi_tinh`) VALUES
+(NULL, 'admin', 'admin@example.com', 'admin@example.com', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'admin', '2025-08-26 12:51:06', '1990-01-01', 'Nam'),
+(NULL, 'bacsi', 'bacsi@example.com', 'bacsi@example.com', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'bacsi', '2025-08-26 12:51:06', '1990-01-01', 'Nam'),
+(NULL, 'khach', 'khach@example.com', 'khach@example.com', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'khach', '2025-08-26 12:51:06', '1990-01-01', 'Nam');
+
 INSERT INTO Benh (ten_benh, mo_ta) VALUES
 ('Cúm', 'Bệnh cúm do virus gây ra, ảnh hưởng đến hệ hô hấp.'),
 ('Sởi', 'Bệnh sởi là bệnh truyền nhiễm do virus sởi.');

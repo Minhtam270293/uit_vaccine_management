@@ -33,8 +33,13 @@ import com.uit.vaccinemanagement.dao.NguoiDungDAO;
 import com.uit.vaccinemanagement.dao.NhaSanXuatDAO;
 import com.uit.vaccinemanagement.dao.VaccineDAO;
 import com.uit.vaccinemanagement.model.NguoiDung;
+import com.uit.vaccinemanagement.model.NhaSanXuat;
+import com.uit.vaccinemanagement.model.Vaccine;
 
 public class AdminView {
+    // Pagination for user table
+    private int currentUserPage = 1;
+    private final int pageSize = 20;
 
     private final NguoiDung currentUser;
     private final NguoiDungDAO nguoiDungDAO = new NguoiDungDAO();
@@ -147,8 +152,8 @@ public class AdminView {
         JPanel paginationPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton btnPrev = new JButton("<<");
         JButton btnNext = new JButton(">>");
-        JLabel lblPageInfo = new JLabel("Trang 1/1");
-        JLabel lblTotalRows = new JLabel("Tổng số: 1");
+        JLabel lblPageInfo = new JLabel();
+        JLabel lblTotalRows = new JLabel();
 
         paginationPanel.add(lblTotalRows);
         paginationPanel.add(btnPrev);
@@ -156,6 +161,37 @@ public class AdminView {
         paginationPanel.add(btnNext);
 
         rightPanel.add(paginationPanel, BorderLayout.SOUTH);
+
+        // Helper to update pagination info
+        Runnable updatePaginationInfo = () -> {
+            int totalRows = nguoiDungDAO.getAllNguoiDung().size();
+            int totalPages = (int) Math.ceil((double) totalRows / pageSize);
+            if (currentUserPage > totalPages) currentUserPage = totalPages;
+            if (currentUserPage < 1) currentUserPage = 1;
+            lblPageInfo.setText("Trang " + currentUserPage + "/" + (totalPages == 0 ? 1 : totalPages));
+            lblTotalRows.setText("Tổng số: " + totalRows);
+            btnPrev.setEnabled(currentUserPage > 1);
+            btnNext.setEnabled(currentUserPage < totalPages);
+        };
+
+        // Pagination button actions
+        btnPrev.addActionListener(e -> {
+            if (currentUserPage > 1) {
+                currentUserPage--;
+                btnNguoiDung.doClick();
+            }
+        });
+        btnNext.addActionListener(e -> {
+            int totalRows = nguoiDungDAO.getAllNguoiDung().size();
+            int totalPages = (int) Math.ceil((double) totalRows / pageSize);
+            if (currentUserPage < totalPages) {
+                currentUserPage++;
+                btnNguoiDung.doClick();
+            }
+        });
+
+        // Call updatePaginationInfo after table update
+        // (You should call updatePaginationInfo.run() at the end of btnNguoiDung's ActionListener)
 
         // Split pane
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, rightPanel);
@@ -167,7 +203,7 @@ public class AdminView {
         btnNguoiDung.addActionListener((ActionEvent e) -> {
             tableTitle.setText("Danh sách người dùng");
             tableTitle.setFont(new Font("Arial", Font.BOLD, 18));
-            List<NguoiDung> userList = nguoiDungDAO.getAllNguoiDung();
+            List<NguoiDung> userList = nguoiDungDAO.getNguoiDungPage(currentUserPage, pageSize);
 
             String[] columns = {"Mã ND", "Họ Tên", "Tên đăng nhập", "Email", "Vai trò", "Ngày tạo", "Ngày sinh", "Giới tính", "Thao tác"};
             DefaultTableModel model = new DefaultTableModel(columns, 0);
@@ -199,8 +235,8 @@ public class AdminView {
                         boolean isSelected, boolean hasFocus, int row, int column) {
 
                     JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
-                    JButton btnEdit = new JButton("✎");    
-                    JButton btnDelete = new JButton("🗑"); 
+                    JButton btnEdit = new JButton("✎");
+                    JButton btnDelete = new JButton("🗑");
 
                     btnEdit.setPreferredSize(new Dimension(50, 25));
                     btnDelete.setPreferredSize(new Dimension(50, 25));
@@ -232,7 +268,6 @@ public class AdminView {
                             NguoiDung nd = nguoiDungDAO.getAllNguoiDung().stream()
                                     .filter(u -> u.getMaNguoiDung().equals(maNguoiDung))
                                     .findFirst().orElse(null);
-                            // JOptionPane.showMessageDialog(frame, "Edit user: " + maNguoiDung);
 
                             // TODO: mở form edit user
                             JDialog editDialog = new JDialog(frame, "Edit User", true);
@@ -273,7 +308,7 @@ public class AdminView {
                                 if (success) {
                                     JOptionPane.showMessageDialog(editDialog, "Cập nhật thành công!");
                                     editDialog.dispose();
-                                    // Refresh table by reusing the button's action
+                                    // Refresh lại table
                                     btnNguoiDung.doClick();
                                 } else {
                                     JOptionPane.showMessageDialog(editDialog, "Cập nhật thất bại!");
@@ -346,17 +381,21 @@ public class AdminView {
             rightPanel.repaint();
             rightPanel.add(headerPanel, BorderLayout.NORTH);
             rightPanel.add(paginationPanel, BorderLayout.SOUTH);
+            // Update pagination info after table update
+            updatePaginationInfo.run();
         });
 
         // Vaccine
         btnVaccine.addActionListener((ActionEvent e) -> {
             tableTitle.setText("Danh sách vaccine");
             List<Object[]> vaccineList = vaccineDAO.getAllVaccineAsObjectArray();
+
             String[] columns = {"Mã Vaccine", "Tên Vaccine", "Số lô", "Ngày SX", "Ngày hết hạn",
                 "Tổng SL", "SL còn lại", "Giá nhập", "Giá bán",
                 "Mã bệnh", "Mã NSX", "Ngày tạo", "Thao tác"}; // thêm cột Thao tác
-
             DefaultTableModel model = new DefaultTableModel(columns, 0);
+
+            // Đổ dữ liệu vào model
             for (Object[] row : vaccineList) {
                 Object[] newRow = new Object[row.length + 1];
                 System.arraycopy(row, 0, newRow, 0, row.length);
@@ -406,7 +445,7 @@ public class AdminView {
             actionColumn.setCellRenderer(new TableCellRenderer() {
                 @Override
                 public Component getTableCellRendererComponent(JTable table, Object value,
-                                                            boolean isSelected, boolean hasFocus, int row, int column) {
+                        boolean isSelected, boolean hasFocus, int row, int column) {
                     JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
                     JButton btnEdit = new JButton("✎");
                     JButton btnDelete = new JButton("🗑");
@@ -434,17 +473,105 @@ public class AdminView {
                     panel.add(btnDelete);
 
                     // Sự kiện Edit
-                    btnEdit.addActionListener(ev -> {
+                    btnEdit.addActionListener(e -> {
                         int row = newTable.getSelectedRow();
                         if (row != -1) {
                             String maVaccine = newTable.getValueAt(row, 0).toString();
+                            Vaccine vc = vaccineDAO.getAllVaccine().stream()
+                                    .filter(v -> v.getMaVaccine().equals(maVaccine))
+                                    .findFirst().orElse(null);
                             // TODO: lấy Vaccine từ DAO theo maVaccine và mở form chỉnh sửa
-                            JOptionPane.showMessageDialog(frame, "Edit vaccine: " + maVaccine);
+                            JDialog editDialog = new JDialog(frame, "Edit Vaccine", true);
+                            editDialog.setSize(400, 300);
+                            editDialog.setLayout(new GridLayout(0, 2, 5, 5));
+
+                            JTextField tfMaVaccine = new JTextField(vc.getMaVaccine());
+                            JTextField tfTenVaccine = new JTextField(vc.getTenVaccine());
+                            JTextField tfHinhAnhUrl = new JTextField(vc.getHinhAnhUrl());
+                            JTextField tfSoLo = new JTextField(vc.getSoLo());
+                            JTextField tfNgaySX = new JTextField(vc.getNgaySX() != null ? vc.getNgaySX().toString() : "");
+                            JTextField tfNgayHetHan = new JTextField(vc.getNgayHetHan() != null ? vc.getNgayHetHan().toString() : "");
+                            JTextField tfTongSL = new JTextField(String.valueOf(vc.getTongSL()));
+                            JTextField tfSLConLai = new JTextField(String.valueOf(vc.getSlConLai()));
+                            JTextField tfGiaNhap = new JTextField(String.valueOf(vc.getGiaNhap()));
+                            JTextField tfGiaBan = new JTextField(String.valueOf(vc.getGiaBan()));
+                            JTextField tfMoTa = new JTextField(vc.getMoTa());
+                            JTextField tfMaBenh = new JTextField(vc.getMaBenh());
+                            JTextField tfMaNhaSX = new JTextField(vc.getMaNhaSX());
+                            JTextField tfNgayTao = new JTextField(vc.getNgayTao() != null ? vc.getNgayTao().toString() : "");
+
+                            editDialog.add(new JLabel("Mã vaccine:"));
+                            editDialog.add(tfMaVaccine);
+                            editDialog.add(new JLabel("Tên vaccine:"));
+                            editDialog.add(tfTenVaccine);
+                            editDialog.add(new JLabel("Hình ảnh URL:"));
+                            editDialog.add(tfHinhAnhUrl);
+                            editDialog.add(new JLabel("Số lô:"));
+                            editDialog.add(tfSoLo);
+                            editDialog.add(new JLabel("Ngày sản xuất (yyyy-mm-dd):"));
+                            editDialog.add(tfNgaySX);
+                            editDialog.add(new JLabel("Ngày hết hạn (yyyy-mm-dd):"));
+                            editDialog.add(tfNgayHetHan);
+                            editDialog.add(new JLabel("Tổng SL:"));
+                            editDialog.add(tfTongSL);
+                            editDialog.add(new JLabel("SL còn lại:"));
+                            editDialog.add(tfSLConLai);
+                            editDialog.add(new JLabel("Giá nhập:"));
+                            editDialog.add(tfGiaNhap);
+                            editDialog.add(new JLabel("Giá bán:"));
+                            editDialog.add(tfGiaBan);
+                            editDialog.add(new JLabel("Mô tả:"));
+                            editDialog.add(tfMoTa);
+                            editDialog.add(new JLabel("Mã bệnh:"));
+                            editDialog.add(tfMaBenh);
+                            editDialog.add(new JLabel("Mã nhà SX:"));
+                            editDialog.add(tfMaNhaSX);
+                            editDialog.add(new JLabel("Ngày tạo (yyyy-mm-dd hh:mm:ss):"));
+                            editDialog.add(tfNgayTao);
+
+                            JButton btnSave = new JButton("Lưu");
+                            JButton btnCancel = new JButton("Hủy");
+                            editDialog.add(btnSave);
+                            editDialog.add(btnCancel);
+
+                            btnSave.addActionListener(ev -> {
+                                try {
+                                    vc.setMaVaccine(tfMaVaccine.getText().trim());
+                                    vc.setTenVaccine(tfTenVaccine.getText().trim());
+                                    vc.setHinhAnhUrl(tfHinhAnhUrl.getText().trim());
+                                    vc.setSoLo(tfSoLo.getText().trim());
+                                    vc.setNgaySX(tfNgaySX.getText().isEmpty() ? null : java.sql.Date.valueOf(tfNgaySX.getText().trim()));
+                                    vc.setNgayHetHan(tfNgayHetHan.getText().isEmpty() ? null : java.sql.Date.valueOf(tfNgayHetHan.getText().trim()));
+                                    vc.setTongSL(tfTongSL.getText().isEmpty() ? 0 : Integer.parseInt(tfTongSL.getText().trim()));
+                                    vc.setSlConLai(tfSLConLai.getText().isEmpty() ? 0 : Integer.parseInt(tfSLConLai.getText().trim()));
+                                    vc.setGiaNhap(tfGiaNhap.getText().isEmpty() ? 0 : Double.parseDouble(tfGiaNhap.getText().trim()));
+                                    vc.setGiaBan(tfGiaBan.getText().isEmpty() ? 0 : Double.parseDouble(tfGiaBan.getText().trim()));
+                                    vc.setMoTa(tfMoTa.getText().trim());
+                                    vc.setMaBenh(tfMaBenh.getText().trim());
+                                    vc.setMaNhaSX(tfMaNhaSX.getText().trim());
+                                    vc.setNgayTao(tfNgayTao.getText().isEmpty() ? null : java.sql.Timestamp.valueOf(tfNgayTao.getText().trim()));
+                                } catch (Exception ex) {
+                                    JOptionPane.showMessageDialog(editDialog, "Lỗi dữ liệu: " + ex.getMessage());
+                                    return;
+                                }
+                                boolean success = vaccineDAO.updateVaccine(vc);
+                                if (success) {
+                                    JOptionPane.showMessageDialog(editDialog, "Cập nhật thành công!");
+                                    editDialog.dispose();
+                                    // Refresh lại table
+                                    btnVaccine.doClick();
+                                } else {
+                                    JOptionPane.showMessageDialog(editDialog, "Cập nhật thất bại!");
+                                }
+                            });
+                            btnCancel.addActionListener(ev -> editDialog.dispose());
+                            editDialog.setLocationRelativeTo(frame);
+                            editDialog.setVisible(true);
                         }
                     });
 
                     // Sự kiện Delete
-                    btnDelete.addActionListener(ev -> {
+                    btnDelete.addActionListener(e -> {
                         int row = newTable.getSelectedRow();
                         if (row != -1) {
                             String maVaccine = newTable.getValueAt(row, 0).toString();
@@ -482,7 +609,6 @@ public class AdminView {
             rightPanel.repaint();
             rightPanel.add(paginationPanel, BorderLayout.SOUTH);
         });
-
 
         // Nhà Sản Xuất table
         btnNhaSanXuat.addActionListener((ActionEvent e) -> {
@@ -534,7 +660,7 @@ public class AdminView {
             actionColumn.setCellRenderer(new TableCellRenderer() {
                 @Override
                 public Component getTableCellRendererComponent(JTable table, Object value,
-                                                            boolean isSelected, boolean hasFocus, int row, int column) {
+                        boolean isSelected, boolean hasFocus, int row, int column) {
                     JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
                     JButton btnEdit = new JButton("✎");
                     JButton btnDelete = new JButton("🗑");
@@ -562,12 +688,58 @@ public class AdminView {
                     panel.add(btnDelete);
 
                     // Sự kiện Edit
-                    btnEdit.addActionListener(ev -> {
+                    btnEdit.addActionListener(e -> {
                         int row = newTable.getSelectedRow();
                         if (row != -1) {
                             String maNSX = newTable.getValueAt(row, 0).toString();
+                            NhaSanXuat nsx = nhaSanXuatDAO.getAllNhaSanXuat().stream()
+                                    .filter(n -> n.getMaNhaSX().equals(maNSX))
+                                    .findFirst().orElse(null);
                             // TODO: lấy NhaSanXuat từ DAO theo maNSX và mở form chỉnh sửa
-                            JOptionPane.showMessageDialog(frame, "Edit NSX: " + maNSX);
+                            JDialog editDialog = new JDialog(frame, "Edit Vaccine", true);
+                            editDialog.setSize(400, 300);
+                            editDialog.setLayout(new GridLayout(0, 2, 5, 5));
+
+                            JTextField tfMaNhaSX = new JTextField(nsx.getMaNhaSX());
+                            JTextField tfTenNhaSX = new JTextField(nsx.getTenNhaSX());
+                            JTextField tfQuocGia = new JTextField(nsx.getQuocGia());
+                            JTextField tfNgayTao = new JTextField(nsx.getNgayTao() != null ? nsx.getNgayTao().toString() : "");
+
+                            editDialog.add(new JLabel("Mã NSX:"));
+                            editDialog.add(tfMaNhaSX);
+                            editDialog.add(new JLabel("Tên nhà sản xuất:"));
+                            editDialog.add(tfTenNhaSX);
+                            editDialog.add(new JLabel("Quốc gia:"));
+                            editDialog.add(tfQuocGia);
+                            editDialog.add(new JLabel("Ngày tạo (yyyy-mm-dd hh:mm:ss):"));
+                            editDialog.add(tfNgayTao);
+
+                            JButton btnSave = new JButton("Lưu");
+                            JButton btnCancel = new JButton("Hủy");
+                            editDialog.add(btnSave);
+                            editDialog.add(btnCancel);
+
+                            btnSave.addActionListener(ev -> {
+                                try {
+                                    nsx.setTenNhaSX(tfTenNhaSX.getText().trim());
+                                    nsx.setQuocGia(tfQuocGia.getText().trim());
+                                    nsx.setNgayTao(tfNgayTao.getText().isEmpty() ? null : java.sql.Timestamp.valueOf(tfNgayTao.getText().trim()));
+                                } catch (Exception ex) {
+                                    JOptionPane.showMessageDialog(editDialog, "Lỗi dữ liệu: " + ex.getMessage());
+                                    return;
+                                }
+                                boolean success = nhaSanXuatDAO.updateNhaSanXuat(nsx);
+                                if (success) {
+                                    JOptionPane.showMessageDialog(editDialog, "Cập nhật thành công!");
+                                    editDialog.dispose();
+                                    btnNhaSanXuat.doClick();
+                                } else {
+                                    JOptionPane.showMessageDialog(editDialog, "Cập nhật thất bại!");
+                                }
+                            });
+                            btnCancel.addActionListener(ev -> editDialog.dispose());
+                            editDialog.setLocationRelativeTo(frame);
+                            editDialog.setVisible(true);
                         }
                     });
 
@@ -610,7 +782,6 @@ public class AdminView {
             rightPanel.repaint();
             rightPanel.add(paginationPanel, BorderLayout.SOUTH);
         });
-
 
         frame.setVisible(true);
     }

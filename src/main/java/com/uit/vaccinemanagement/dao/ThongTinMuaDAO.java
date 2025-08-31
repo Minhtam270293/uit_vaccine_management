@@ -73,7 +73,7 @@ public class ThongTinMuaDAO {
 
     public List<Object[]> getByMaKhach(String maKhach) {
         List<Object[]> result = new ArrayList<>();
-        String sql = "SELECT * FROM thong_tin_mua WHERE ma_khach = ?";
+        String sql = "SELECT * FROM Thong_Tin_Mua WHERE ma_khach = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, maKhach);

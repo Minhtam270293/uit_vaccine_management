@@ -7,6 +7,41 @@ import java.sql.*;
 import java.util.*;
 
 public class NguoiDungDAO {
+    // DAO-level pagination
+    public List<NguoiDung> getNguoiDungPage(int page, int pageSize) {
+        if (page <= 0) page = 1;
+        if (pageSize <= 0) pageSize = 20;
+        List<NguoiDung> list = new ArrayList<>();
+        String sql = "SELECT * FROM Nguoi_Dung ORDER BY ma_nguoi_dung LIMIT ?, ?";
+        try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, (page - 1) * pageSize);
+            ps.setInt(2, pageSize);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    NguoiDung nd = new NguoiDung(
+                            rs.getString("ma_nguoi_dung"),
+                            rs.getString("ho_ten"),
+                            rs.getString("ten_dang_nhap"),
+                            rs.getString("email"),
+                            rs.getString("mat_khau"),
+                            Role.valueOf(rs.getString("vai_tro").toUpperCase()),
+                            rs.getDate("ngay_sinh"),
+                            rs.getString("gioi_tinh"),
+                            rs.getTimestamp("ngay_tao")
+                    );
+                    list.add(nd);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    // Overload for default page/pageSize
+    public List<NguoiDung> getNguoiDungPage() {
+        return getNguoiDungPage(1, 20);
+    }
 
     public List<NguoiDung> getAllNguoiDung() {
         List<NguoiDung> list = new ArrayList<>();
