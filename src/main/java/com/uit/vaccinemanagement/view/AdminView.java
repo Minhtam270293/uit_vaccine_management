@@ -3,11 +3,15 @@ package com.uit.vaccinemanagement.view;
 import java.awt.event.ActionEvent;
 import java.util.List;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.net.URL;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultCellEditor;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
@@ -26,6 +30,8 @@ import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+
+
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 
@@ -473,14 +479,20 @@ public class AdminView {
                     panel.add(btnDelete);
 
                     // Sự kiện Edit
-                    btnEdit.addActionListener(e -> {
+                    btnEdit.addActionListener(ev -> {
                         int row = newTable.getSelectedRow();
                         if (row != -1) {
                             String maVaccine = newTable.getValueAt(row, 0).toString();
                             Vaccine vc = vaccineDAO.getAllVaccine().stream()
                                     .filter(v -> v.getMaVaccine().equals(maVaccine))
                                     .findFirst().orElse(null);
-                            // TODO: lấy Vaccine từ DAO theo maVaccine và mở form chỉnh sửa
+
+                            if (vc == null) {
+                                JOptionPane.showMessageDialog(frame, "Không tìm thấy vaccine!");
+                                return;
+                            }
+
+                            // Mở form Edit
                             JDialog editDialog = new JDialog(frame, "Edit Vaccine", true);
                             editDialog.setSize(400, 300);
                             editDialog.setLayout(new GridLayout(0, 2, 5, 5));
@@ -508,9 +520,9 @@ public class AdminView {
                             editDialog.add(tfHinhAnhUrl);
                             editDialog.add(new JLabel("Số lô:"));
                             editDialog.add(tfSoLo);
-                            editDialog.add(new JLabel("Ngày sản xuất (yyyy-mm-dd):"));
+                            editDialog.add(new JLabel("Ngày SX:"));
                             editDialog.add(tfNgaySX);
-                            editDialog.add(new JLabel("Ngày hết hạn (yyyy-mm-dd):"));
+                            editDialog.add(new JLabel("Ngày hết hạn:"));
                             editDialog.add(tfNgayHetHan);
                             editDialog.add(new JLabel("Tổng SL:"));
                             editDialog.add(tfTongSL);
@@ -524,9 +536,9 @@ public class AdminView {
                             editDialog.add(tfMoTa);
                             editDialog.add(new JLabel("Mã bệnh:"));
                             editDialog.add(tfMaBenh);
-                            editDialog.add(new JLabel("Mã nhà SX:"));
+                            editDialog.add(new JLabel("Mã NSX:"));
                             editDialog.add(tfMaNhaSX);
-                            editDialog.add(new JLabel("Ngày tạo (yyyy-mm-dd hh:mm:ss):"));
+                            editDialog.add(new JLabel("Ngày tạo:"));
                             editDialog.add(tfNgayTao);
 
                             JButton btnSave = new JButton("Lưu");
@@ -534,9 +546,8 @@ public class AdminView {
                             editDialog.add(btnSave);
                             editDialog.add(btnCancel);
 
-                            btnSave.addActionListener(ev -> {
+                            btnSave.addActionListener(saveEv -> {
                                 try {
-                                    vc.setMaVaccine(tfMaVaccine.getText().trim());
                                     vc.setTenVaccine(tfTenVaccine.getText().trim());
                                     vc.setHinhAnhUrl(tfHinhAnhUrl.getText().trim());
                                     vc.setSoLo(tfSoLo.getText().trim());
@@ -558,20 +569,19 @@ public class AdminView {
                                 if (success) {
                                     JOptionPane.showMessageDialog(editDialog, "Cập nhật thành công!");
                                     editDialog.dispose();
-                                    // Refresh lại table
                                     btnVaccine.doClick();
                                 } else {
                                     JOptionPane.showMessageDialog(editDialog, "Cập nhật thất bại!");
                                 }
                             });
-                            btnCancel.addActionListener(ev -> editDialog.dispose());
+                            btnCancel.addActionListener(saveEv -> editDialog.dispose());
                             editDialog.setLocationRelativeTo(frame);
                             editDialog.setVisible(true);
                         }
                     });
 
                     // Sự kiện Delete
-                    btnDelete.addActionListener(e -> {
+                    btnDelete.addActionListener(ev -> {
                         int row = newTable.getSelectedRow();
                         if (row != -1) {
                             String maVaccine = newTable.getValueAt(row, 0).toString();
@@ -600,6 +610,36 @@ public class AdminView {
                 }
             });
 
+            // ======= Sự kiện click vào Tên Vaccine để hiển thị ảnh =======
+            newTable.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    int row = newTable.rowAtPoint(e.getPoint());
+                    int col = newTable.columnAtPoint(e.getPoint());
+                    if (row != -1 && col == 1) { // cột Tên Vaccine
+                        String maVaccine = newTable.getValueAt(row, 0).toString();
+                        Vaccine vc = vaccineDAO.getAllVaccine().stream()
+                                .filter(v -> v.getMaVaccine().equals(maVaccine))
+                                .findFirst().orElse(null);
+
+                        if (vc != null && vc.getHinhAnhUrl() != null && !vc.getHinhAnhUrl().isEmpty()) {
+                            try {
+                                URL url = new URL(vc.getHinhAnhUrl());
+                                ImageIcon icon = new ImageIcon(url);
+                                Image img = icon.getImage().getScaledInstance(300, 300, Image.SCALE_SMOOTH);
+                                JLabel lblImg = new JLabel(new ImageIcon(img));
+
+                                JOptionPane.showMessageDialog(frame, lblImg, vc.getTenVaccine(), JOptionPane.PLAIN_MESSAGE);
+                            } catch (Exception ex) {
+                                JOptionPane.showMessageDialog(frame, "Không tải được hình ảnh!");
+                            }
+                        } else {
+                            JOptionPane.showMessageDialog(frame, "Không có hình ảnh cho vaccine này!");
+                        }
+                    }
+                }
+            });
+
             // Đưa vào ScrollPane
             JScrollPane newScrollPane = new JScrollPane(newTable);
             rightPanel.removeAll();
@@ -609,6 +649,7 @@ public class AdminView {
             rightPanel.repaint();
             rightPanel.add(paginationPanel, BorderLayout.SOUTH);
         });
+
 
         // Nhà Sản Xuất table
         btnNhaSanXuat.addActionListener((ActionEvent e) -> {
