@@ -67,21 +67,44 @@ public class AdminView {
         leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
         leftPanel.setPreferredSize(new Dimension(600, 200));
 
-        // Khung 1: Tên và Vai trò
-        JPanel userInfoPanel = new JPanel(new GridLayout(2, 1, 0, 2));
-        userInfoPanel.setAlignmentX(Component.CENTER_ALIGNMENT); // căn giữa panel
-        JLabel lblTen = new JLabel("Tên: " + currentUser.getHoTen());
-        JLabel lblVaiTro = new JLabel("Vai trò: " + currentUser.getVaiTro());
-        // Căn giữa
-        lblTen.setHorizontalAlignment(SwingConstants.CENTER);
-        lblVaiTro.setHorizontalAlignment(SwingConstants.CENTER);
-        // Thêm label vào panel
-        userInfoPanel.add(lblTen);
-        userInfoPanel.add(lblVaiTro);
-        // Bóp chiều cao của panel lại (chỉ vừa cho 2 dòng chữ)
-        userInfoPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
-        // Thêm vào leftPanel
-        leftPanel.add(userInfoPanel);
+        // Khung 1: Tên và Vai trò (bo tròn, căn giữa, có icon)
+        JPanel infoPanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(new Color(245, 245, 245)); // nền xám nhạt
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 18, 18);
+                g2.setColor(new Color(200, 200, 200));
+                g2.setStroke(new BasicStroke(1));
+                g2.drawRoundRect(0, 0, getWidth()-1, getHeight()-1, 18, 18);
+                g2.dispose();
+            }
+        };
+        infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
+        infoPanel.setOpaque(false);
+        infoPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 60));
+        infoPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        infoPanel.setBorder(BorderFactory.createEmptyBorder(18, 0, 18, 0));
+
+        // Sử dụng emoji Unicode thay cho icon hệ thống để tránh lỗi
+        JLabel lblTen = new JLabel("\uD83D\uDC64 Tên: " + currentUser.getHoTen());
+        lblTen.setFont(new Font("Roboto", Font.BOLD, 16));
+        lblTen.setForeground(new Color(33, 150, 243));
+        lblTen.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JLabel lblVaiTro = new JLabel("\uD83D\uDD12 Vai trò: " + currentUser.getVaiTro());
+        lblVaiTro.setFont(new Font("Roboto", Font.BOLD, 16));
+        lblVaiTro.setForeground(new Color(244, 67, 54));
+        lblVaiTro.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        infoPanel.add(lblTen);
+        infoPanel.add(Box.createVerticalStrut(6));
+        infoPanel.add(lblVaiTro);
+
+        leftPanel.add(Box.createVerticalStrut(16));
+        leftPanel.add(infoPanel);
         leftPanel.add(Box.createRigidArea(new Dimension(0, 10)));
 
         // Khung 2: Các nút bấm
@@ -106,17 +129,20 @@ public class AdminView {
         // Thêm khoảng cách 20px giữa khung 2 và khung 3
         leftPanel.add(Box.createRigidArea(new Dimension(0, 50)));
 
-        // Khung 3: Nút Đăng Xuất
+        // Khung 3: Nút Đăng Xuất (panel riêng, đưa xuống cuối sidebar)
         JPanel buttonPanelLogout = new JPanel();
         buttonPanelLogout.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 10));
-        // Tạo các nút bấm
+        buttonPanelLogout.setMaximumSize(new Dimension(Integer.MAX_VALUE, 60));
+        buttonPanelLogout.setOpaque(false);
+
         JButton btnDangXuat = SharedComponents.createLogoutButton(e -> {
             frame.dispose();
             com.uit.vaccinemanagement.VaccineManagement.showLogin();
         });
         btnDangXuat.setPreferredSize(buttonSize);
         buttonPanelLogout.add(btnDangXuat);
-        // Thêm Khung 3 vào leftPanel
+
+        leftPanel.add(Box.createVerticalGlue()); // đẩy logout xuống cuối
         leftPanel.add(buttonPanelLogout);
 
         // Right panel (column 2)
