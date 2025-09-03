@@ -37,9 +37,9 @@ public class BacSiView {
         // Left panel (column 1)
         JPanel leftPanel = new JPanel();
         leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
-        leftPanel.setPreferredSize(new Dimension(200, 500));
+        leftPanel.setPreferredSize(new Dimension(220, 500));
 
-        // ================= Khung 1: Thông tin User =================
+        // Khung 1: Tên và Vai trò (bo tròn, căn giữa, có icon)
         JPanel infoPanel = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
@@ -76,32 +76,43 @@ public class BacSiView {
 
         leftPanel.add(Box.createVerticalStrut(16));
         leftPanel.add(infoPanel);
-        leftPanel.add(Box.createRigidArea(new Dimension(0, 10))); // khoảng cách dưới khung 1
+        leftPanel.add(Box.createRigidArea(new Dimension(0, 10)));
 
-        // ================= Khung 2: Các nút chức năng =================
+        // Khung 2: Các nút chức năng (dọc, căn giữa, chiều dài đều, cố định vị trí trên)
         JPanel buttonPanel = new JPanel();
-        buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 10)); // căn giữa, cách nhau dọc 10px
+        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
+        buttonPanel.setOpaque(false);
+        buttonPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        // tạo các nút
+        Dimension buttonSize = new Dimension(200, 40);
+
         RoundedButton btnTiemChung = new RoundedButton("Tiêm chủng");
         RoundedButton btnKhachHang = new RoundedButton("Khách hàng");
         RoundedButton btnChiDinhTiem = new RoundedButton("Chỉ định tiêm");
 
-        // đặt kích thước đồng đều
-        Dimension buttonSize = new Dimension(160, 40);
         btnTiemChung.setPreferredSize(buttonSize);
         btnKhachHang.setPreferredSize(buttonSize);
         btnChiDinhTiem.setPreferredSize(buttonSize);
 
-        // thêm nút vào panel
+        btnTiemChung.setMaximumSize(buttonSize);
+        btnKhachHang.setMaximumSize(buttonSize);
+        btnChiDinhTiem.setMaximumSize(buttonSize);
+
+        btnTiemChung.setAlignmentX(Component.CENTER_ALIGNMENT);
+        btnKhachHang.setAlignmentX(Component.CENTER_ALIGNMENT);
+        btnChiDinhTiem.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        // Không dùng glue, chỉ dùng strut để giữ nút ở trên
         buttonPanel.add(btnTiemChung);
+        buttonPanel.add(Box.createVerticalStrut(10));
         buttonPanel.add(btnKhachHang);
+        buttonPanel.add(Box.createVerticalStrut(10));
         buttonPanel.add(btnChiDinhTiem);
 
         leftPanel.add(buttonPanel);
-        leftPanel.add(Box.createRigidArea(new Dimension(0, 50))); // cách với khung 3
+        leftPanel.add(Box.createRigidArea(new Dimension(0, 50)));
 
-        // ================= Khung 3: Đăng xuất (panel riêng, đưa xuống cuối sidebar) =================
+        // Khung 3: Đăng xuất (panel riêng, đưa xuống cuối sidebar)
         JPanel buttonPanelLogout = new JPanel();
         buttonPanelLogout.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 10));
         buttonPanelLogout.setMaximumSize(new Dimension(Integer.MAX_VALUE, 60));
@@ -114,7 +125,7 @@ public class BacSiView {
         btnDangXuat.setPreferredSize(buttonSize);
         buttonPanelLogout.add(btnDangXuat);
 
-        leftPanel.add(Box.createVerticalGlue()); // đẩy logout xuống cuối
+        leftPanel.add(Box.createVerticalGlue());
         leftPanel.add(buttonPanelLogout);
 
         btnChiDinhTiem.addActionListener((ActionEvent e) -> {
