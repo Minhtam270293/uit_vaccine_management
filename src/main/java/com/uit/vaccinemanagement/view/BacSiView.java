@@ -129,99 +129,12 @@ public class BacSiView {
         leftPanel.add(buttonPanelLogout);
 
         btnChiDinhTiem.addActionListener((ActionEvent e) -> {
-            JDialog dialog = new JDialog(frame, "Tạo chỉ định tiêm", true);
-            dialog.setSize(400, 300);
-            JPanel mainPanel = new JPanel(new GridBagLayout());
-            GridBagConstraints gbc = new GridBagConstraints();
-            gbc.insets = new Insets(5, 5, 5, 5);
-            gbc.fill = GridBagConstraints.HORIZONTAL;
-
-            // Khach selection
-            JLabel lblKhach = new JLabel("Khách hàng:");
-            JComboBox<String> cbKhach = new JComboBox<>();
-            for (com.uit.vaccinemanagement.model.NguoiDung nd : nguoiDungDAO.getAllNguoiDung()) {
-                if (nd.getVaiTro().name().equalsIgnoreCase("khach")) {
-                    cbKhach.addItem(nd.getMaNguoiDung() + " - " + nd.getHoTen());
-                }
-            }
-
-            // Vaccine selection
-            JLabel lblVaccine = new JLabel("Vắc xin:");
-            JComboBox<String> cbVaccine = new JComboBox<>();
-            com.uit.vaccinemanagement.dao.VaccineDAO vaccineDAO = new com.uit.vaccinemanagement.dao.VaccineDAO();
-            for (Object[] v : vaccineDAO.getAllVaccineAsObjectArray()) {
-                cbVaccine.addItem(v[0] + " - " + v[1]); // ma_vaccine - ten_vaccine
-            }
-
-            // Ngay tiêm
-            JLabel lblNgayTiem = new JLabel("Ngày tiêm (yyyy-mm-dd):");
-            JTextField tfNgayTiem = new JTextField();
-
-            // Ghi chú
-            JLabel lblGhiChu = new JLabel("Ghi chú:");
-            JTextArea taGhiChu = new JTextArea(3, 20);
-            JScrollPane ghiChuScroll = new JScrollPane(taGhiChu);
-
-            // Buttons
-            JPanel btnPanel = new JPanel();
-            JButton btnHuy = new JButton("Hủy");
-            JButton btnTaoChiDinh = new JButton("Tạo chỉ định");
-            btnPanel.add(btnHuy);
-            btnPanel.add(btnTaoChiDinh);
-
-            int row = 0;
-            gbc.gridx = 0; gbc.gridy = row; mainPanel.add(lblKhach, gbc);
-            gbc.gridx = 1; gbc.gridy = row++; mainPanel.add(cbKhach, gbc);
-            gbc.gridx = 0; gbc.gridy = row; mainPanel.add(lblVaccine, gbc);
-            gbc.gridx = 1; gbc.gridy = row++; mainPanel.add(cbVaccine, gbc);
-            gbc.gridx = 0; gbc.gridy = row; mainPanel.add(lblNgayTiem, gbc);
-            gbc.gridx = 1; gbc.gridy = row++; mainPanel.add(tfNgayTiem, gbc);
-            gbc.gridx = 0; gbc.gridy = row; mainPanel.add(lblGhiChu, gbc);
-            gbc.gridx = 1; gbc.gridy = row++; mainPanel.add(ghiChuScroll, gbc);
-            gbc.gridx = 0; gbc.gridy = row; gbc.gridwidth = 2; mainPanel.add(btnPanel, gbc);
-
-            dialog.setContentPane(mainPanel);
-
-            btnHuy.addActionListener(ev -> dialog.dispose());
-
-            btnTaoChiDinh.addActionListener(ev -> {
-                try {
-                    String vaccineStr = (String) cbVaccine.getSelectedItem();
-                    String maVaccine = vaccineStr.split(" - ")[0];
-                    String khachStr = (String) cbKhach.getSelectedItem();
-                    String maKhach = khachStr.split(" - ")[0];
-                    String ngayTiemStr = tfNgayTiem.getText().trim();
-                    java.sql.Date ngayTiem = java.sql.Date.valueOf(ngayTiemStr);
-                    String ghiChu = taGhiChu.getText().trim();
-
-                    // Set ngay_chi_dinh to current timestamp
-                    java.sql.Date ngayChiDinh = new java.sql.Date(System.currentTimeMillis());
-
-                    // Create tiem_chung record
-                    com.uit.vaccinemanagement.dao.TiemChungDAO tcDAO = new com.uit.vaccinemanagement.dao.TiemChungDAO();
-                    com.uit.vaccinemanagement.model.TiemChung tc = new com.uit.vaccinemanagement.model.TiemChung(
-                        null, // ma_tiem_chung (auto-increment)
-                        maVaccine,
-                        currentUser.getMaNguoiDung(),
-                        maKhach,
-                        ngayChiDinh,
-                        ngayTiem,
-                        "cho_tiem", // trang_thai_tiem
-                        ghiChu
-                    );
-                    boolean success = tcDAO.addTiemChung(tc);
-                    if (success) {
-                        JOptionPane.showMessageDialog(dialog, "Tạo chỉ định tiêm thành công!");
-                        dialog.dispose();
-                    } else {
-                        JOptionPane.showMessageDialog(dialog, "Tạo chỉ định tiêm thất bại!");
-                    }
-                } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(dialog, "Lỗi nhập liệu hoặc hệ thống!");
-                }
-            });
-
-            dialog.setLocationRelativeTo(frame);
+            ChiDinhTiemDialog dialog = new ChiDinhTiemDialog(
+                frame,
+                currentUser,
+                nguoiDungDAO,
+                tiemChungDAO
+            );
             dialog.setVisible(true);
         });
 
