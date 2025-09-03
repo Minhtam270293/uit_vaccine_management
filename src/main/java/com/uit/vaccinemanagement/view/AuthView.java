@@ -4,6 +4,7 @@ import com.uit.vaccinemanagement.view.AuthButton;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 
 public class AuthView {
 
@@ -15,7 +16,6 @@ public class AuthView {
     public void showAuthUI(AuthCallback callback) {
         JFrame frame = new JFrame("Đăng nhập");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(430, 230);
 
         JPanel mainPanel = new JPanel(new BorderLayout());
         JPanel panel = new JPanel(new GridBagLayout()) {
@@ -24,23 +24,22 @@ public class AuthView {
                 super.paintComponent(g);
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(Color.WHITE); // hoặc màu nền khác
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 18, 18); // bo góc 18px
+                g2.setColor(Color.WHITE);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 18, 18);
                 g2.dispose();
             }
         };
         panel.setBorder(BorderFactory.createEmptyBorder(18, 24, 18, 24));
 
-        // Tiêu đề in đậm
+        // Tiêu đề
         JLabel lblTitle = new JLabel("Đăng nhập hệ thống", SwingConstants.CENTER);
         lblTitle.setFont(new Font("Arial", Font.BOLD, 18));
-        lblTitle.setBorder(BorderFactory.createEmptyBorder(18, 0, 12, 0)); // tăng lề trên (top=18)
+        lblTitle.setBorder(BorderFactory.createEmptyBorder(18, 0, 12, 0));
         mainPanel.add(lblTitle, BorderLayout.NORTH);
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(4, 8, 4, 8);
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.gridx = 0; gbc.gridy = 0;
 
         Font uiFont = new Font("Arial", Font.PLAIN, 15);
         Font btnFont = new Font("Arial", Font.BOLD, 15);
@@ -49,74 +48,94 @@ public class AuthView {
         lblEmail.setFont(uiFont);
 
         String[] emails = {
-            "admin@example.com",
-            "bacsiA@example.com",
-            "khachB@example.com",
-            "Nhập email khác..."
+                "admin@example.com",
+                "bacsiA@example.com",
+                "khachB@example.com",
+                "Nhập email khác..."
         };
         JComboBox<String> cbEmail = new JComboBox<>(emails);
         cbEmail.setFont(uiFont);
 
-        JTextField txtEmailCustom = new JTextField() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(getBackground());
-                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 12, 12);
-                g2.dispose();
-            }
-            @Override
-            protected void paintBorder(Graphics g) {
-                Graphics2D g2 = (Graphics2D) g.create();
-                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(Color.LIGHT_GRAY);
-                g2.drawRoundRect(0, 0, getWidth()-1, getHeight()-1, 12, 12);
-                g2.dispose();
-            }
-        };
-        txtEmailCustom.setFont(uiFont);
-        txtEmailCustom.setVisible(false);
+        JTextField txtEmail = new JTextField();
+        txtEmail.setFont(uiFont);
+        txtEmail.setVisible(false);
+        txtEmail.setBorder(BorderFactory.createCompoundBorder(
+                new RoundedBorder(Color.LIGHT_GRAY, 1, 12),
+                BorderFactory.createEmptyBorder(2, 8, 2, 8)
+        ));
 
+        int fieldWidth = 220, fieldHeight = 28;
+        int refreshWidth = 32;
+        int totalWidth = fieldWidth + refreshWidth;
+
+        // Panel Email + Refresh
+        JPanel emailInputPanel = new JPanel(new BorderLayout());
+        emailInputPanel.setPreferredSize(new Dimension(totalWidth, fieldHeight));
+        emailInputPanel.setOpaque(false);
+
+        JPanel cardPanel = new JPanel(new CardLayout());
+        cardPanel.setOpaque(false);
+        cardPanel.setPreferredSize(new Dimension(fieldWidth, fieldHeight));
+
+        cbEmail.setPreferredSize(new Dimension(fieldWidth, fieldHeight));
+        txtEmail.setPreferredSize(new Dimension(fieldWidth, fieldHeight));
+
+        cardPanel.add(cbEmail, "combo");
+        cardPanel.add(txtEmail, "text");
+
+        // Icon refresh
+        int iconW = 20, iconH = 20;
+        BufferedImage refreshImg = new BufferedImage(iconW, iconH, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2icon = refreshImg.createGraphics();
+        g2icon.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2icon.setStroke(new BasicStroke(2.5f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        g2icon.setColor(new Color(22, 110, 210));
+        g2icon.drawArc(3, 3, 14, 14, 40, 270);
+        g2icon.drawLine(15, 7, 18, 4);
+        g2icon.drawLine(15, 7, 13, 4);
+        g2icon.dispose();
+        Icon refreshIcon = new ImageIcon(refreshImg);
+
+        JButton btnRefresh = new JButton(refreshIcon);
+        btnRefresh.setPreferredSize(new Dimension(refreshWidth, fieldHeight));
+        btnRefresh.setFocusable(false);
+        btnRefresh.setBorder(BorderFactory.createEmptyBorder());
+        btnRefresh.setContentAreaFilled(false);
+        btnRefresh.setVisible(false);
+
+        emailInputPanel.add(cardPanel, BorderLayout.CENTER);
+        emailInputPanel.add(btnRefresh, BorderLayout.EAST);
+
+        // Thêm Email
         gbc.gridx = 0; gbc.gridy = 0;
         panel.add(lblEmail, gbc);
-
         gbc.gridx = 1; gbc.gridy = 0;
-        panel.add(cbEmail, gbc);
+        panel.add(emailInputPanel, gbc);
 
-        gbc.gridx = 0; gbc.gridy = 1;
-        panel.add(new JLabel(""), gbc); // placeholder
-
-        gbc.gridx = 1; gbc.gridy = 1;
-        panel.add(txtEmailCustom, gbc);
-
+        // Mật khẩu
         JLabel lblPass = new JLabel("Mật khẩu:");
         lblPass.setFont(uiFont);
 
         gbc.gridx = 0; gbc.gridy = 2;
         panel.add(lblPass, gbc);
 
-        // Ô mật khẩu bo góc 12px, hiển thị text mặc định
         JPasswordField txtPass = new JPasswordField("123456");
         txtPass.setFont(uiFont);
-        txtPass.setPreferredSize(cbEmail.getPreferredSize()); // tăng chiều cao cho bằng email
-
-        // Sử dụng border bo góc 12px cho JPasswordField
+        txtPass.setPreferredSize(new Dimension(totalWidth, fieldHeight));
         txtPass.setBorder(BorderFactory.createCompoundBorder(
-            new RoundedBorder(Color.LIGHT_GRAY, 1, 12),
-            BorderFactory.createEmptyBorder(2, 8, 2, 8)
+                new RoundedBorder(Color.LIGHT_GRAY, 1, 12),
+                BorderFactory.createEmptyBorder(2, 8, 2, 8)
         ));
 
         gbc.gridx = 1; gbc.gridy = 2;
         panel.add(txtPass, gbc);
 
-        // Dòng trống tăng khoảng cách
+        // Khoảng cách
         gbc.gridx = 0; gbc.gridy = 3;
         gbc.gridwidth = 2;
         panel.add(Box.createVerticalStrut(18), gbc);
 
-        // Nút đăng nhập và đăng ký (đặt vào một panel để chiều dài bằng nhau)
+        // Nút đăng nhập / đăng ký
         AuthButton btnLogin = new AuthButton("Đăng nhập", new Color(22, 110, 210));
         AuthButton btnSignUp = new AuthButton("Đăng ký", new Color(210, 90, 22));
         btnLogin.setFont(btnFont);
@@ -125,9 +144,8 @@ public class AuthView {
         btnLogin.setPreferredSize(buttonSize);
         btnSignUp.setPreferredSize(buttonSize);
 
-        // Sửa lại: dùng JPanel thường, không override paintComponent
         JPanel buttonPanel = new JPanel(new GridLayout(1, 2, 12, 0));
-        buttonPanel.setOpaque(false); // Đảm bảo không vẽ nền
+        buttonPanel.setOpaque(false);
         buttonPanel.add(btnLogin);
         buttonPanel.add(btnSignUp);
 
@@ -135,20 +153,42 @@ public class AuthView {
         gbc.gridwidth = 2;
         panel.add(buttonPanel, gbc);
 
-        // Sự kiện login
-        btnLogin.addActionListener(e -> {
-            String loginEmail;
-            if (txtEmailCustom.isVisible()) {
-                loginEmail = txtEmailCustom.getText().trim();
+        // CardLayout cho Email
+        CardLayout cardLayout = (CardLayout) cardPanel.getLayout();
+        cbEmail.addActionListener(e -> {
+            String selected = (String) cbEmail.getSelectedItem();
+            if ("Nhập email khác...".equals(selected)) {
+                cardLayout.show(cardPanel, "text");
+                btnRefresh.setVisible(true);
+                txtEmail.setText("");
+                txtEmail.requestFocus();
             } else {
-                loginEmail = (String) cbEmail.getSelectedItem();
+                cardLayout.show(cardPanel, "combo");
+                btnRefresh.setVisible(false);
+                txtEmail.setText("");
             }
+            emailInputPanel.revalidate();
+            emailInputPanel.repaint();
+        });
+
+        btnRefresh.addActionListener(e -> {
+            cardLayout.show(cardPanel, "combo");
+            btnRefresh.setVisible(false);
+            cbEmail.setSelectedIndex(0);
+            emailInputPanel.revalidate();
+            emailInputPanel.repaint();
+        });
+
+        // Login
+        btnLogin.addActionListener(e -> {
+            String loginEmail = txtEmail.isVisible() ? txtEmail.getText().trim()
+                    : (String) cbEmail.getSelectedItem();
             String password = new String(txtPass.getPassword());
             frame.dispose();
             callback.onLogin(loginEmail, password);
         });
 
-        // Sự kiện sign up
+        // Sign Up
         btnSignUp.addActionListener(e -> {
             frame.dispose();
             callback.onSignUpClicked();
@@ -161,7 +201,7 @@ public class AuthView {
         frame.setVisible(true);
     }
 
-    // Thêm class RoundedBorder vào cuối file (hoặc vào file riêng nếu muốn dùng lại)
+    // Border bo góc
     class RoundedBorder extends javax.swing.border.AbstractBorder {
         private final Color color;
         private final int thickness;
