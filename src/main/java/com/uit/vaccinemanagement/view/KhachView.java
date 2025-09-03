@@ -6,6 +6,7 @@ import com.uit.vaccinemanagement.dao.ThongTinMuaDAO;
 
 import javax.swing.*;
 import com.uit.vaccinemanagement.view.SharedComponents;
+import com.uit.vaccinemanagement.view.RoundedButton;
 
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
@@ -35,10 +36,12 @@ public class KhachView {
 
         // Khung 1: Tên và Vai trò
         JPanel userInfoPanel = new JPanel(new GridLayout(2, 1, 0, 2));
+        userInfoPanel.setAlignmentX(Component.CENTER_ALIGNMENT); // căn giữa panel
         JLabel lblTen = new JLabel("Tên: " + currentUser.getHoTen());
         JLabel lblVaiTro = new JLabel("Vai trò: " + currentUser.getVaiTro());
-        lblTen.setHorizontalAlignment(SwingConstants.LEFT);
-        lblVaiTro.setHorizontalAlignment(SwingConstants.LEFT);
+        // Căn giữa
+        lblTen.setHorizontalAlignment(SwingConstants.CENTER);
+        lblVaiTro.setHorizontalAlignment(SwingConstants.CENTER);
         userInfoPanel.add(lblTen);
         userInfoPanel.add(lblVaiTro);
         userInfoPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
@@ -48,8 +51,8 @@ public class KhachView {
         // Khung 2: Các nút bấm
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 10));
         Dimension buttonSize = new Dimension(180, 35);
-        JButton btnLichTiem = new JButton("Xem lịch tiêm");
-        JButton btnLichSuMua = new JButton("Xem lịch sử mua");
+        RoundedButton btnLichTiem = new RoundedButton("Xem lịch sử tiêm");
+        RoundedButton btnLichSuMua = new RoundedButton("Xem lịch sử mua");
         btnLichTiem.setPreferredSize(buttonSize);
         btnLichSuMua.setPreferredSize(buttonSize);
         buttonPanel.add(btnLichTiem);
@@ -123,11 +126,11 @@ public class KhachView {
     // Logout button event is now handled by SharedComponents
         // ====== Xử lý button ở panel trái ======
         btnLichTiem.addActionListener((ActionEvent e) -> {
-            tableTitle.setText("Lịch sử tiêm");
+            tableTitle.setText("LỊCH SỬ TIÊM CHỦNG");
 
             // Lấy dữ liệu từ DAO
             List<Object[]> data = tiemChungDAO.getByMaKhach(currentUser.getMaNguoiDung());
-            String[] columns = {"Mã tiêm chủng", "Ngày tiêm", "Mã vaccine", "Mã bác sĩ", "Trạng thái tiêm", "Ghi chú"};
+            String[] columns = {"Mã tiêm chủng", "Ngày tiêm", "Mã vắc xin", "Mã bác sĩ", "Trạng thái tiêm", "Ghi chú"};
 
             // Tạo model mới
             DefaultTableModel model = new DefaultTableModel(columns, 0);
@@ -147,11 +150,11 @@ public class KhachView {
 
     // lịch sử mua
         btnLichSuMua.addActionListener((ActionEvent e) -> {
-            tableTitle.setText("Lịch sử mua");
+            tableTitle.setText("LỊCH SỬ MUA HÀNG");
 
             // Lấy dữ liệu từ DAO
             List<Object[]> data = thongTinMuaDAO.getByMaKhach(currentUser.getMaNguoiDung());
-            String[] columns = {"Mã giao dịch", "Mã vaccine", "Mã khách", "Số lượng mua", "Tổng tiền", "Ngày giao dịch"};
+            String[] columns = {"Mã giao dịch", "Mã vắc xin", "Mã khách", "Số lượng mua", "Tổng tiền", "Ngày giao dịch"};
 
             // Tạo model mới
             DefaultTableModel model = new DefaultTableModel(columns, 0);

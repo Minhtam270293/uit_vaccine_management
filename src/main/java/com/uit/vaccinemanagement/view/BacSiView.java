@@ -6,6 +6,7 @@ import com.uit.vaccinemanagement.model.NguoiDung;
 
 import javax.swing.*;
 import com.uit.vaccinemanagement.view.SharedComponents;
+import com.uit.vaccinemanagement.view.RoundedButton;
 
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
@@ -40,11 +41,12 @@ public class BacSiView {
 
         // ================= Khung 1: Thông tin User =================
         JPanel userInfoPanel = new JPanel(new GridLayout(2, 1, 0, 2));
+        userInfoPanel.setAlignmentX(Component.CENTER_ALIGNMENT); // căn giữa panel
         JLabel lblTen = new JLabel("Tên: " + currentUser.getHoTen());
         JLabel lblVaiTro = new JLabel("Vai trò: " + currentUser.getVaiTro());
-        // căn trái
-        lblTen.setHorizontalAlignment(SwingConstants.LEFT);
-        lblVaiTro.setHorizontalAlignment(SwingConstants.LEFT);
+        // Căn giữa
+        lblTen.setHorizontalAlignment(SwingConstants.CENTER);
+        lblVaiTro.setHorizontalAlignment(SwingConstants.CENTER);
 
         userInfoPanel.add(lblTen);
         userInfoPanel.add(lblVaiTro);
@@ -59,9 +61,9 @@ public class BacSiView {
         buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 10)); // căn giữa, cách nhau dọc 10px
 
         // tạo các nút
-        JButton btnTiemChung = new JButton("Tiêm chủng");
-        JButton btnKhachHang = new JButton("Khách hàng");
-        JButton btnChiDinhTiem = new JButton("Chỉ định tiêm");
+        RoundedButton btnTiemChung = new RoundedButton("Tiêm chủng");
+        RoundedButton btnKhachHang = new RoundedButton("Khách hàng");
+        RoundedButton btnChiDinhTiem = new RoundedButton("Chỉ định tiêm");
 
         // đặt kích thước đồng đều
         Dimension buttonSize = new Dimension(160, 40);
@@ -86,7 +88,6 @@ public class BacSiView {
             com.uit.vaccinemanagement.VaccineManagement.showLogin();
         });
         btnDangXuat.setPreferredSize(buttonSize);
-
         buttonPanelLogout.add(btnDangXuat);
         leftPanel.add(buttonPanelLogout);
 
@@ -108,7 +109,7 @@ public class BacSiView {
             }
 
             // Vaccine selection
-            JLabel lblVaccine = new JLabel("Vaccine:");
+            JLabel lblVaccine = new JLabel("Vắc xin:");
             JComboBox<String> cbVaccine = new JComboBox<>();
             com.uit.vaccinemanagement.dao.VaccineDAO vaccineDAO = new com.uit.vaccinemanagement.dao.VaccineDAO();
             for (Object[] v : vaccineDAO.getAllVaccineAsObjectArray()) {
@@ -251,11 +252,11 @@ public class BacSiView {
         // -----------------------------------------------------------------------------------------------------------
         // Danh sách tiêm chủng
         btnTiemChung.addActionListener((ActionEvent e) -> {
-            tableTitle.setText("Danh sách tiêm chủng");
+            tableTitle.setText("QUẢN LÝ TIÊM CHỦNG");
             List<Object[]> data = tiemChungDAO.getByMaBacSi(currentUser.getMaNguoiDung());
 
             // Cột
-            String[] columns = {"Mã TC", "Ngày tiêm", "Mã vaccine", "Mã bác sĩ", "Mã khách", "Trạng thái", "Ghi chú", "Thao tác"};
+            String[] columns = {"Mã TC", "Ngày tiêm", "Mã vắc xin", "Mã bác sĩ", "Mã khách", "Trạng thái", "Ghi chú", "Thao tác"};
             DefaultTableModel model = new DefaultTableModel(columns, 0);
 
             // Đổ dữ liệu
@@ -335,7 +336,7 @@ public class BacSiView {
                         if (row != -1) {
                             String maTC = newTable.getValueAt(row, 0).toString();
                             // TODO: Lấy đối tượng TiemChung từ DAO theo maTC và mở form edit
-                            JOptionPane.showMessageDialog(frame, "Edit Tiêm chủng: " + maTC);
+                            JOptionPane.showMessageDialog(frame, "Sửa tiêm chủng: " + maTC);
                         }
                     });
 
@@ -384,7 +385,7 @@ public class BacSiView {
 
         // Danh sách khách hàng
         btnKhachHang.addActionListener((ActionEvent e) -> {
-            tableTitle.setText("Danh sách khách hàng");
+            tableTitle.setText("QUẢN LÝ KHÁCH HÀNG");
             List<NguoiDung> khachList = nguoiDungDAO.getAllNguoiDung();
 
             String[] columns = {"Mã KH", "Họ Tên", "Tên đăng nhập", "Email", "Vai trò", "Ngày tạo", "Ngày sinh", "Giới tính", "Thao tác"};
@@ -482,7 +483,7 @@ public class BacSiView {
 
                             if (khach != null) {
                                 // TODO: mở dialog edit khách hàng (giống edit người dùng)
-                                JOptionPane.showMessageDialog(frame, "Edit Khách hàng: " + maKH);
+                                JOptionPane.showMessageDialog(frame, "Sửa khách hàng: " + maKH);
                             }
                         }
                     });
@@ -531,3 +532,4 @@ public class BacSiView {
         frame.setVisible(true);
     }
 }
+

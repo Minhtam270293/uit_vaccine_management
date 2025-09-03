@@ -52,27 +52,35 @@ public class VaccineManagement {
 
     private static void showSignUp() {
         SignUpView signUpView = new SignUpView();
-        signUpView.showSignUpUI((hoTen, username, email, password, dob, gender) -> {
-            NguoiDungDAO nguoiDungDAO = new NguoiDungDAO();
-            NguoiDung newUser = new NguoiDung();
-            newUser.setHoTen(hoTen);
-            newUser.setTenDangNhap(username);
-            newUser.setEmail(email);
-            newUser.setMatKhau(PasswordUtils.hashPassword(password));
-            newUser.setVaiTro(Role.KHACH); // Default role
-            try {
-                newUser.setNgaySinh(Date.valueOf(dob));
-            } catch (Exception e) {
-                newUser.setNgaySinh(null);
-            }
-            newUser.setGioiTinh(gender);
+        signUpView.showSignUpUI(new SignUpView.SignUpCallback() {
+            @Override
+            public void onRegister(String username, String hoTen, String email, String password, String dob, String gender) {
+                NguoiDungDAO nguoiDungDAO = new NguoiDungDAO();
+                NguoiDung newUser = new NguoiDung();
+                newUser.setHoTen(hoTen);
+                newUser.setTenDangNhap(username);
+                newUser.setEmail(email);
+                newUser.setMatKhau(com.uit.vaccinemanagement.util.PasswordUtils.hashPassword(password));
+                newUser.setVaiTro(com.uit.vaccinemanagement.util.Role.KHACH); // Default role
+                try {
+                    newUser.setNgaySinh(java.sql.Date.valueOf(dob));
+                } catch (Exception e) {
+                    newUser.setNgaySinh(null);
+                }
+                newUser.setGioiTinh(gender);
 
-            if (nguoiDungDAO.addNguoiDung(newUser)) {
-                JOptionPane.showMessageDialog(null, "Đăng ký thành công! Vui lòng đăng nhập.");
+                if (nguoiDungDAO.addNguoiDung(newUser)) {
+                    JOptionPane.showMessageDialog(null, "Đăng ký thành công! Vui lòng đăng nhập.");
+                    showLogin();
+                } else {
+                    JOptionPane.showMessageDialog(null, "Đăng ký thất bại! Email hoặc tên đăng nhập đã tồn tại.");
+                    showSignUp();
+                }
+            }
+
+            @Override
+            public void onBack() {
                 showLogin();
-            } else {
-                JOptionPane.showMessageDialog(null, "Đăng ký thất bại! Email hoặc tên đăng nhập đã tồn tại.");
-                showSignUp();
             }
         });
     }

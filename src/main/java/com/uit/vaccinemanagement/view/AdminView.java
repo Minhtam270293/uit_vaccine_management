@@ -69,12 +69,12 @@ public class AdminView {
 
         // Khung 1: Tên và Vai trò
         JPanel userInfoPanel = new JPanel(new GridLayout(2, 1, 0, 2));
-        // 2 hàng, 1 cột, khoảng cách ngang = 0, dọc = 2px
+        userInfoPanel.setAlignmentX(Component.CENTER_ALIGNMENT); // căn giữa panel
         JLabel lblTen = new JLabel("Tên: " + currentUser.getHoTen());
         JLabel lblVaiTro = new JLabel("Vai trò: " + currentUser.getVaiTro());
-        // Căn trái
-        lblTen.setHorizontalAlignment(SwingConstants.LEFT);
-        lblVaiTro.setHorizontalAlignment(SwingConstants.LEFT);
+        // Căn giữa
+        lblTen.setHorizontalAlignment(SwingConstants.CENTER);
+        lblVaiTro.setHorizontalAlignment(SwingConstants.CENTER);
         // Thêm label vào panel
         userInfoPanel.add(lblTen);
         userInfoPanel.add(lblVaiTro);
@@ -87,15 +87,16 @@ public class AdminView {
         // Khung 2: Các nút bấm
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 10));  // Căn giữa với khoảng cách dọc là 10px
-        // Tạo các nút bấm
-        JButton btnNguoiDung = new JButton("Người Dùng");
-        JButton btnVaccine = new JButton("Vaccine");
-        JButton btnNhaSanXuat = new JButton("Nhà sản xuất");
+        // Đảm bảo bạn dùng RoundedButton cho 3 nút sidebar như sau:
+        RoundedButton btnNguoiDung = new RoundedButton("Người dùng");
+        RoundedButton btnVaccine = new RoundedButton("Vắc xin");
+        RoundedButton btnNhaSanXuat = new RoundedButton("Nhà sản xuất");
         // Đặt kích thước đồng đều cho các nút
         Dimension buttonSize = new Dimension(200, 40);
         btnNguoiDung.setPreferredSize(buttonSize);
         btnVaccine.setPreferredSize(buttonSize);
         btnNhaSanXuat.setPreferredSize(buttonSize);
+
         // Thêm các nút vào buttonPanel
         buttonPanel.add(btnNguoiDung);
         buttonPanel.add(btnVaccine);
@@ -138,7 +139,7 @@ public class AdminView {
         topPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
         // Buttons download + search
         JButton btnDownload = new JButton("Tìm kiếm");
-        JButton btnAdd = new JButton("Download");
+        JButton btnAdd = new JButton("Tải xuống");
         topPanel.add(btnDownload);
         topPanel.add(Box.createHorizontalStrut(10));
         topPanel.add(btnAdd);
@@ -207,11 +208,11 @@ public class AdminView {
         // -------------------------------------------------------------------------------------------------------------------------
         // Người dùng table
         btnNguoiDung.addActionListener((ActionEvent e) -> {
-            tableTitle.setText("Danh sách người dùng");
+            tableTitle.setText("QUẢN LÝ NGƯỜI DÙNG");
             tableTitle.setFont(new Font("Arial", Font.BOLD, 18));
             List<NguoiDung> userList = nguoiDungDAO.getNguoiDungPage(currentUserPage, pageSize);
 
-            String[] columns = {"Mã ND", "Họ Tên", "Tên đăng nhập", "Email", "Vai trò", "Ngày tạo", "Ngày sinh", "Giới tính", "Thao tác"};
+            String[] columns = {"Mã ND", "Họ tên", "Tên đăng nhập", "Email", "Vai trò", "Ngày tạo", "Ngày sinh", "Giới tính", "Thao tác"};
             DefaultTableModel model = new DefaultTableModel(columns, 0);
 
             // Đổ dữ liệu vào model
@@ -276,7 +277,7 @@ public class AdminView {
                                     .findFirst().orElse(null);
 
                             // TODO: mở form edit user
-                            JDialog editDialog = new JDialog(frame, "Edit User", true);
+                            JDialog editDialog = new JDialog(frame, "Sửa người dùng", true);
                             editDialog.setSize(400, 300);
                             editDialog.setLayout(new GridLayout(0, 2, 5, 5));
 
@@ -331,7 +332,7 @@ public class AdminView {
                         int row = newTable.getSelectedRow();
                         if (row != -1) {
                             String maNguoiDung = newTable.getValueAt(row, 0).toString();
-                            int confirm = JOptionPane.showConfirmDialog(frame, "Xóa user " + maNguoiDung + " ?", "Xác nhận", JOptionPane.YES_NO_OPTION);
+                            int confirm = JOptionPane.showConfirmDialog(frame, "Xóa người dùng " + maNguoiDung + " ?", "Xác nhận", JOptionPane.YES_NO_OPTION);
                             if (confirm == JOptionPane.YES_OPTION) {
                                 boolean success = nguoiDungDAO.deleteNguoiDung(maNguoiDung);
                                 if (success) {
@@ -393,10 +394,10 @@ public class AdminView {
 
         // Vaccine
         btnVaccine.addActionListener((ActionEvent e) -> {
-            tableTitle.setText("Danh sách vaccine");
+            tableTitle.setText("QUẢN LÝ VẮC XIN");
             List<Object[]> vaccineList = vaccineDAO.getAllVaccineAsObjectArray();
 
-            String[] columns = {"Mã Vaccine", "Tên Vaccine", "Số lô", "Ngày SX", "Ngày hết hạn",
+            String[] columns = {"Mã vắc xin", "Tên vắc xin", "Số lô", "Ngày SX", "Ngày hết hạn",
                 "Tổng SL", "SL còn lại", "Giá nhập", "Giá bán",
                 "Mã bệnh", "Mã NSX", "Ngày tạo", "Thao tác"}; // thêm cột Thao tác
             DefaultTableModel model = new DefaultTableModel(columns, 0);
@@ -488,12 +489,12 @@ public class AdminView {
                                     .findFirst().orElse(null);
 
                             if (vc == null) {
-                                JOptionPane.showMessageDialog(frame, "Không tìm thấy vaccine!");
+                                JOptionPane.showMessageDialog(frame, "Không tìm thấy vắc xin!");
                                 return;
                             }
 
                             // Mở form Edit
-                            JDialog editDialog = new JDialog(frame, "Edit Vaccine", true);
+                            JDialog editDialog = new JDialog(frame, "Sửa vắc xin", true);
                             editDialog.setSize(400, 300);
                             editDialog.setLayout(new GridLayout(0, 2, 5, 5));
 
@@ -512,9 +513,9 @@ public class AdminView {
                             JTextField tfMaNhaSX = new JTextField(vc.getMaNhaSX());
                             JTextField tfNgayTao = new JTextField(vc.getNgayTao() != null ? vc.getNgayTao().toString() : "");
 
-                            editDialog.add(new JLabel("Mã vaccine:"));
+                            editDialog.add(new JLabel("Mã vắc xin:"));
                             editDialog.add(tfMaVaccine);
-                            editDialog.add(new JLabel("Tên vaccine:"));
+                            editDialog.add(new JLabel("Tên vắc xin:"));
                             editDialog.add(tfTenVaccine);
                             editDialog.add(new JLabel("Hình ảnh URL:"));
                             editDialog.add(tfHinhAnhUrl);
@@ -585,7 +586,7 @@ public class AdminView {
                         int row = newTable.getSelectedRow();
                         if (row != -1) {
                             String maVaccine = newTable.getValueAt(row, 0).toString();
-                            int confirm = JOptionPane.showConfirmDialog(frame, "Xóa vaccine " + maVaccine + " ?", "Xác nhận", JOptionPane.YES_NO_OPTION);
+                            int confirm = JOptionPane.showConfirmDialog(frame, "Xóa vắc xin " + maVaccine + " ?", "Xác nhận", JOptionPane.YES_NO_OPTION);
                             if (confirm == JOptionPane.YES_OPTION) {
                                 boolean success = vaccineDAO.deleteVaccine(maVaccine);
                                 if (success) {
@@ -634,7 +635,7 @@ public class AdminView {
                                 JOptionPane.showMessageDialog(frame, "Không tải được hình ảnh!");
                             }
                         } else {
-                            JOptionPane.showMessageDialog(frame, "Không có hình ảnh cho vaccine này!");
+                            JOptionPane.showMessageDialog(frame, "Không có hình ảnh cho vắc xin này!");
                         }
                     }
                 }
@@ -653,7 +654,7 @@ public class AdminView {
 
         // Nhà Sản Xuất table
         btnNhaSanXuat.addActionListener((ActionEvent e) -> {
-            tableTitle.setText("Danh sách nhà sản xuất");
+            tableTitle.setText("QUẢN LÝ NHÀ SẢN XUẤT");
             List<Object[]> nsxList = nhaSanXuatDAO.getAllNhaSanXuatAsObjectArray();
             String[] columns = {"Mã NSX", "Tên nhà sản xuất", "Quốc gia", "Ngày tạo", "Thao tác"}; // thêm cột Thao tác
 
@@ -737,7 +738,7 @@ public class AdminView {
                                     .filter(n -> n.getMaNhaSX().equals(maNSX))
                                     .findFirst().orElse(null);
                             // TODO: lấy NhaSanXuat từ DAO theo maNSX và mở form chỉnh sửa
-                            JDialog editDialog = new JDialog(frame, "Edit Vaccine", true);
+                            JDialog editDialog = new JDialog(frame, "Sửa nhà sản xuất", true);
                             editDialog.setSize(400, 300);
                             editDialog.setLayout(new GridLayout(0, 2, 5, 5));
 
@@ -789,7 +790,7 @@ public class AdminView {
                         int row = newTable.getSelectedRow();
                         if (row != -1) {
                             String maNSX = newTable.getValueAt(row, 0).toString();
-                            int confirm = JOptionPane.showConfirmDialog(frame, "Xóa NSX " + maNSX + " ?", "Xác nhận", JOptionPane.YES_NO_OPTION);
+                            int confirm = JOptionPane.showConfirmDialog(frame, "Xóa nhà sản xuất " + maNSX + " ?", "Xác nhận", JOptionPane.YES_NO_OPTION);
                             if (confirm == JOptionPane.YES_OPTION) {
                                 boolean success = nhaSanXuatDAO.deleteNhaSanXuat(maNSX);
                                 if (success) {
