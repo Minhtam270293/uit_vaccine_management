@@ -7,15 +7,31 @@ import java.sql.*;
 import java.util.*;
 
 public class NguoiDungDAO {
+    public int getTotalNguoiDung() throws SQLException {
+        String sql = "SELECT COUNT(*) FROM Nguoi_Dung";
+        try (Connection conn = DBConnection.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+            return 0;
+        }
+    }
+
     // DAO-level pagination
-    public List<NguoiDung> getNguoiDungPage(int page, int pageSize) {
+    public List<NguoiDung> getNguoiDungPage(int page, int pageSize) throws SQLException {
         if (page <= 0) page = 1;
         if (pageSize <= 0) pageSize = 20;
+        
         List<NguoiDung> list = new ArrayList<>();
         String sql = "SELECT * FROM Nguoi_Dung ORDER BY ma_nguoi_dung LIMIT ?, ?";
-        try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, (page - 1) * pageSize);
             ps.setInt(2, pageSize);
+            
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     NguoiDung nd = new NguoiDung(
@@ -32,14 +48,12 @@ public class NguoiDungDAO {
                     list.add(nd);
                 }
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
         return list;
     }
 
     // Overload for default page/pageSize
-    public List<NguoiDung> getNguoiDungPage() {
+    public List<NguoiDung> getNguoiDungPage() throws SQLException {
         return getNguoiDungPage(1, 20);
     }
 

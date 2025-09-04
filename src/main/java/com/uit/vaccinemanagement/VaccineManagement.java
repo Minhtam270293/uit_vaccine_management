@@ -27,9 +27,10 @@ public class VaccineManagement {
                             && nd.getMatKhau().equals(PasswordUtils.hashPassword(password))) {
                         switch (nd.getVaiTro()) {
                             case ADMIN:
-                                new AdminView(nd).showAdminUI();
+                                new AdminView(nd).show();
                                 break;
                             case BACSI:
+                                // Will update these views later to extend BaseOverviewView
                                 new BacSiView(nd).showBacSiUI();
                                 break;
                             case KHACH:

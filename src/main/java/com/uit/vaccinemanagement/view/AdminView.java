@@ -1,3 +1,4 @@
+/*
 package com.uit.vaccinemanagement.view;
 
 import java.awt.event.ActionEvent;
@@ -35,16 +36,29 @@ import com.uit.vaccinemanagement.dao.VaccineDAO;
 import com.uit.vaccinemanagement.model.NguoiDung;
 import com.uit.vaccinemanagement.model.NhaSanXuat;
 import com.uit.vaccinemanagement.model.Vaccine;
+import java.awt.event.ActionListener;
 
 public class AdminView {
+
     // Pagination for user table
     private int currentUserPage = 1;
+    private int currentVaccinePage = 1;
     private final int pageSize = 20;
 
     private final NguoiDung currentUser;
     private final NguoiDungDAO nguoiDungDAO = new NguoiDungDAO();
     private final VaccineDAO vaccineDAO = new VaccineDAO();
     private final NhaSanXuatDAO nhaSanXuatDAO = new NhaSanXuatDAO();
+
+    // Helper method to remove existing listeners from pagination buttons
+    private void resetPaginationListeners(JButton btnPrev, JButton btnNext) {
+        for (ActionListener al : btnPrev.getActionListeners()) {
+            btnPrev.removeActionListener(al);
+        }
+        for (ActionListener al : btnNext.getActionListeners()) {
+            btnNext.removeActionListener(al);
+        }
+    }
 
     public AdminView(NguoiDung currentUser) {
         this.currentUser = currentUser;
@@ -166,8 +180,12 @@ public class AdminView {
         Runnable updatePaginationInfo = () -> {
             int totalRows = nguoiDungDAO.getAllNguoiDung().size();
             int totalPages = (int) Math.ceil((double) totalRows / pageSize);
-            if (currentUserPage > totalPages) currentUserPage = totalPages;
-            if (currentUserPage < 1) currentUserPage = 1;
+            if (currentUserPage > totalPages) {
+                currentUserPage = totalPages;
+            }
+            if (currentUserPage < 1) {
+                currentUserPage = 1;
+            }
             lblPageInfo.setText("Trang " + currentUserPage + "/" + (totalPages == 0 ? 1 : totalPages));
             lblTotalRows.setText("Tổng số: " + totalRows);
             btnPrev.setEnabled(currentUserPage > 1);
@@ -192,7 +210,6 @@ public class AdminView {
 
         // Call updatePaginationInfo after table update
         // (You should call updatePaginationInfo.run() at the end of btnNguoiDung's ActionListener)
-
         // Split pane
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, rightPanel);
         splitPane.setDividerLocation(220);
@@ -201,6 +218,9 @@ public class AdminView {
         // -------------------------------------------------------------------------------------------------------------------------
         // Người dùng table
         btnNguoiDung.addActionListener((ActionEvent e) -> {
+            // Reset pagination listeners
+            resetPaginationListeners(btnPrev, btnNext);
+
             tableTitle.setText("Danh sách người dùng");
             tableTitle.setFont(new Font("Arial", Font.BOLD, 18));
             List<NguoiDung> userList = nguoiDungDAO.getNguoiDungPage(currentUserPage, pageSize);
@@ -387,8 +407,39 @@ public class AdminView {
 
         // Vaccine
         btnVaccine.addActionListener((ActionEvent e) -> {
+            // Reset pagination listeners
+            resetPaginationListeners(btnPrev, btnNext);
+
             tableTitle.setText("Danh sách vaccine");
-            List<Object[]> vaccineList = vaccineDAO.getAllVaccineAsObjectArray();
+            List<Vaccine> vaccineList = vaccineDAO.getVaccinePage(currentVaccinePage, pageSize);
+
+            // Update pagination info for vaccine table
+            int totalRows = vaccineDAO.getAllVaccine().size();
+            int totalPages = (int) Math.ceil((double) totalRows / pageSize);
+            if (currentVaccinePage > totalPages) {
+                currentVaccinePage = totalPages;
+            }
+            if (currentVaccinePage < 1) {
+                currentVaccinePage = 1;
+            }
+            lblPageInfo.setText("Trang " + currentVaccinePage + "/" + (totalPages == 0 ? 1 : totalPages));
+            lblTotalRows.setText("Tổng số: " + totalRows);
+            btnPrev.setEnabled(currentVaccinePage > 1);
+            btnNext.setEnabled(currentVaccinePage < totalPages);
+
+            // Update pagination button actions for vaccine table
+            btnPrev.addActionListener(ev -> {
+                if (currentVaccinePage > 1) {
+                    currentVaccinePage--;
+                    btnVaccine.doClick();
+                }
+            });
+            btnNext.addActionListener(ev -> {
+                if (currentVaccinePage < totalPages) {
+                    currentVaccinePage++;
+                    btnVaccine.doClick();
+                }
+            });
 
             String[] columns = {"Mã Vaccine", "Tên Vaccine", "Số lô", "Ngày SX", "Ngày hết hạn",
                 "Tổng SL", "SL còn lại", "Giá nhập", "Giá bán",
@@ -396,11 +447,22 @@ public class AdminView {
             DefaultTableModel model = new DefaultTableModel(columns, 0);
 
             // Đổ dữ liệu vào model
-            for (Object[] row : vaccineList) {
-                Object[] newRow = new Object[row.length + 1];
-                System.arraycopy(row, 0, newRow, 0, row.length);
-                newRow[row.length] = "Thao tác"; // placeholder
-                model.addRow(newRow);
+            for (Vaccine vc : vaccineList) {
+                model.addRow(new Object[]{
+                    vc.getMaVaccine(),
+                    vc.getTenVaccine(),
+                    vc.getSoLo(),
+                    vc.getNgaySX(),
+                    vc.getNgayHetHan(),
+                    vc.getTongSL(),
+                    vc.getSlConLai(),
+                    vc.getGiaNhap(),
+                    vc.getGiaBan(),
+                    vc.getMaBenh(),
+                    vc.getMaNhaSX(),
+                    vc.getNgayTao(),
+                    "Thao tác" // placeholder
+                });
             }
 
             JTable newTable = new JTable(model);
@@ -612,6 +674,9 @@ public class AdminView {
 
         // Nhà Sản Xuất table
         btnNhaSanXuat.addActionListener((ActionEvent e) -> {
+            // Reset pagination listeners
+            resetPaginationListeners(btnPrev, btnNext);
+
             tableTitle.setText("Danh sách nhà sản xuất");
             List<Object[]> nsxList = nhaSanXuatDAO.getAllNhaSanXuatAsObjectArray();
             String[] columns = {"Mã NSX", "Tên nhà sản xuất", "Quốc gia", "Ngày tạo", "Thao tác"}; // thêm cột Thao tác
@@ -784,5 +849,155 @@ public class AdminView {
         });
 
         frame.setVisible(true);
+    }
+}
+ */
+// New implementation
+package com.uit.vaccinemanagement.view;
+
+import com.uit.vaccinemanagement.model.NguoiDung;
+import com.uit.vaccinemanagement.view.components.pages.*;
+import javax.swing.*;
+import java.awt.*;
+
+/**
+ * AdminView handles the admin-specific dashboard interface. Extends
+ * BaseOverviewView to get the basic split-pane layout and navigation structure.
+ *
+ * Key responsibilities: 1. Provides admin-specific navigation (Users, Vaccines,
+ * Manufacturers) 2. Renders appropriate management panels in the content area
+ * 3. Handles panel switching when navigation buttons are clicked
+ */
+public class AdminView extends BaseOverviewView {
+
+    // Constants for panel identification
+    private static final String USER_PANEL = "UserPanel";
+    private static final String VACCINE_PANEL = "VaccinePanel";
+    private static final String MANUFACTURER_PANEL = "ManufacturerPanel";
+
+    public AdminView(NguoiDung currentUser) {
+        super(currentUser);
+    }
+
+    @Override
+    protected void initializeUI() {
+        // Create main frame
+        frame = new JFrame("Admin Dashboard");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(1600, 900);
+
+        // Setup the main panel with card layout for switching between views
+        mainPanel = new JPanel();
+        cardLayout = new CardLayout();
+        mainPanel.setLayout(cardLayout);
+
+        // Create and add management panels
+        initializeManagementPanels();
+
+        // Create navigation panel with admin-specific buttons
+        JPanel navigationPanel = createNavigationPanel();
+
+        // Create split pane with navigation and content
+        JSplitPane splitPane = new JSplitPane(
+                JSplitPane.HORIZONTAL_SPLIT,
+                navigationPanel,
+                mainPanel
+        );
+        splitPane.setDividerLocation(200);
+
+        frame.add(splitPane);
+        frame.setLocationRelativeTo(null);
+    }
+
+    @Override
+    protected JPanel createNavigationPanel() {
+        JPanel navPanel = new JPanel();
+        navPanel.setLayout(new BoxLayout(navPanel, BoxLayout.Y_AXIS));
+        navPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        // Add user info section
+        addUserInfo(navPanel);
+        navPanel.add(Box.createRigidArea(new Dimension(0, 20)));
+
+        // Add admin navigation buttons
+        addAdminNavigationButtons(navPanel);
+
+        // Add spacer
+        navPanel.add(Box.createVerticalGlue());
+
+        // Add logout button at bottom
+        addLogoutButton(navPanel);
+
+        return navPanel;
+    }
+
+    private void addUserInfo(JPanel panel) {
+        JPanel userInfo = new JPanel(new GridLayout(2, 1, 0, 2));
+        userInfo.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
+
+        JLabel nameLabel = new JLabel("Tên: " + currentUser.getHoTen());
+        JLabel roleLabel = new JLabel("Vai trò: " + currentUser.getVaiTro());
+
+        nameLabel.setHorizontalAlignment(SwingConstants.LEFT);
+        roleLabel.setHorizontalAlignment(SwingConstants.LEFT);
+
+        userInfo.add(nameLabel);
+        userInfo.add(roleLabel);
+
+        panel.add(userInfo);
+    }
+
+    private void addAdminNavigationButtons(JPanel panel) {
+        Dimension buttonSize = new Dimension(180, 30);
+
+        // Create and add admin navigation buttons
+        addNavButton(panel, "Người Dùng", USER_PANEL, buttonSize);
+        addNavButton(panel, "Vaccine", VACCINE_PANEL, buttonSize);
+        addNavButton(panel, "Nhà sản xuất", MANUFACTURER_PANEL, buttonSize);
+    }
+
+    private void addNavButton(JPanel panel, String text, String panelName, Dimension size) {
+        JButton button = new JButton(text);
+        button.setPreferredSize(size);
+        button.setMaximumSize(size);
+        button.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        // Switch to appropriate panel when clicked
+        button.addActionListener(e -> cardLayout.show(mainPanel, panelName));
+
+        panel.add(button);
+        panel.add(Box.createRigidArea(new Dimension(0, 10)));
+    }
+
+    private void addLogoutButton(JPanel panel) {
+        JPanel logoutPanel = new JPanel();
+        logoutPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 10));
+
+        JButton btnDangXuat = new JButton("Đăng xuất");
+        btnDangXuat.setPreferredSize(new Dimension(180, 30));
+        btnDangXuat.addActionListener(e -> {
+            frame.dispose();
+            com.uit.vaccinemanagement.VaccineManagement.showLogin();
+        });
+
+        logoutPanel.add(btnDangXuat);
+        panel.add(logoutPanel);
+    }
+
+    @Override
+    protected void initializeManagementPanels() {
+        // Initialize all management panels with the controller
+        mainPanel.add(new UserManagementPanel(controller), USER_PANEL);
+        mainPanel.add(new VaccineManagementPanel(controller), VACCINE_PANEL);
+        mainPanel.add(new NhaSanXuatManagementPanel(controller), MANUFACTURER_PANEL);
+    }
+
+    @Override
+    public void show() {
+        if (!frame.isVisible()) {
+            frame.setVisible(true);
+            // Show user management panel by default
+            cardLayout.show(mainPanel, USER_PANEL);
+        }
     }
 }

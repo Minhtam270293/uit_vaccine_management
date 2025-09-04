@@ -6,6 +6,58 @@ import java.sql.*;
 import java.util.*;
 
 public class VaccineDAO {
+    public int getTotalVaccines() throws SQLException {
+        String sql = "SELECT COUNT(*) FROM Vaccine";
+        try (Connection conn = DBConnection.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+            return 0;
+        }
+    }
+
+    // DAO-level pagination
+public List<Vaccine> getVaccinePage(int page, int pageSize) {
+    if (page <= 0) page = 1;
+    if (pageSize <= 0) pageSize = 20;
+    List<Vaccine> list = new ArrayList<>();
+    String sql = "SELECT * FROM Vaccine ORDER BY ma_vaccine LIMIT ?, ?";
+    try (Connection conn = DBConnection.getConnection(); PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setInt(1, (page - 1) * pageSize);
+        ps.setInt(2, pageSize);
+        try (ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                Vaccine vc = new Vaccine(
+                    rs.getString("ma_vaccine"),
+                    rs.getString("ten_vaccine"),
+                    rs.getString("hinh_anh_url"),
+                    rs.getString("so_lo"),
+                    rs.getDate("ngay_san_xuat"),
+                    rs.getDate("ngay_het_han"),
+                    rs.getInt("tong_so_luong"),
+                    rs.getInt("so_luong_con_lai"),
+                    rs.getDouble("gia_nhap"),
+                    rs.getDouble("gia_ban"),
+                    rs.getString("mo_ta"),
+                    rs.getString("ma_benh"),
+                    rs.getString("ma_nha_sx"),
+                    rs.getTimestamp("ngay_tao")
+                );
+                list.add(vc);
+            }
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return list;
+}
+
+// Overload for default page/pageSize
+public List<Vaccine> getVaccinePage() {
+    return getVaccinePage(1, 20);
+}
 
     public List<Vaccine> getAllVaccine() {
         List<Vaccine> list = new ArrayList<>();
