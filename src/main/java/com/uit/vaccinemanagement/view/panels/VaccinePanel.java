@@ -87,6 +87,32 @@ public class VaccinePanel extends JPanel {
             addDialog.setVisible(true);
         });
 
+        btnDownload.addActionListener(e -> {
+            String downloadUrl = "https://example.com/file.xlsx"; // link cố định
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setDialogTitle("Chọn nơi lưu file");
+            fileChooser.setSelectedFile(new java.io.File("nguoi_dung.xlsx"));
+
+            int userSelection = fileChooser.showSaveDialog(parentFrame);
+            if (userSelection == JFileChooser.APPROVE_OPTION) {
+                java.io.File saveFile = fileChooser.getSelectedFile();
+                try (java.io.BufferedInputStream in = new java.io.BufferedInputStream(new java.net.URL(downloadUrl).openStream());
+                    java.io.FileOutputStream fileOutputStream = new java.io.FileOutputStream(saveFile)) {
+
+                    byte[] dataBuffer = new byte[1024];
+                    int bytesRead;
+                    while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
+                        fileOutputStream.write(dataBuffer, 0, bytesRead);
+                    }
+
+                    JOptionPane.showMessageDialog(parentFrame, "Tải xuống thành công: " + saveFile.getAbsolutePath());
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(parentFrame, "Lỗi khi tải file: " + ex.getMessage());
+                }
+            }
+        });
+
         searchPanel.add(new JLabel("Tìm kiếm vắc xin"));
         searchPanel.add(Box.createHorizontalStrut(5));
         searchPanel.add(searchField);
@@ -214,7 +240,20 @@ public class VaccinePanel extends JPanel {
         TableColumn actionColumn = table.getColumnModel().getColumn(12);
         actionColumn.setCellRenderer(new ButtonRenderer());
         actionColumn.setCellEditor(new ButtonEditor(new JCheckBox()));
+
+        // ======= Sự kiện click vào "Tên vắc xin" để hiển thị ảnh =======
+        table.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int row = table.rowAtPoint(e.getPoint());
+                int col = table.columnAtPoint(e.getPoint());
+                if (row != -1 && col == 1) { // cột Tên Vaccine
+                    showVaccineImage(row);
+                }
+            }
+        });
     }
+
 
     private void showVaccineImage(int row) {
         String maVaccine = table.getValueAt(row, 0).toString();

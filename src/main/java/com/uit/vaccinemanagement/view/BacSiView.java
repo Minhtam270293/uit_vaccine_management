@@ -32,7 +32,7 @@ public class BacSiView {
     public void showBacSiUI() {
         JFrame frame = new JFrame("Bác sĩ Dashboard");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(900, 500);
+        frame.setSize(1150, 500);
 
         // Left panel (column 1)
         JPanel leftPanel = new JPanel();
@@ -202,6 +202,7 @@ public class BacSiView {
         // -----------------------------------------------------------------------------------------------------------
         // Danh sách tiêm chủng
         btnTiemChung.addActionListener((ActionEvent e) -> {
+            frame.setSize(1150, 500);
             tableTitle.setText("QUẢN LÝ TIÊM CHỦNG");
             List<Object[]> data = tiemChungDAO.getByMaBacSi(currentUser.getMaNguoiDung());
 
@@ -335,6 +336,7 @@ public class BacSiView {
 
         // Danh sách khách hàng
         btnKhachHang.addActionListener((ActionEvent e) -> {
+            frame.setSize(1250, 500);
             tableTitle.setText("QUẢN LÝ KHÁCH HÀNG");
             List<NguoiDung> khachList = nguoiDungDAO.getAllNguoiDung();
 

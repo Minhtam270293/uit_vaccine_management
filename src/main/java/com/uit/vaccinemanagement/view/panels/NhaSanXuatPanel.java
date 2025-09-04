@@ -68,6 +68,32 @@ public class NhaSanXuatPanel extends JPanel {
             addDialog.setVisible(true);
         });
 
+        btnDownload.addActionListener(e -> {
+            String downloadUrl = "https://example.com/file.xlsx"; // link cố định
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setDialogTitle("Chọn nơi lưu file");
+            fileChooser.setSelectedFile(new java.io.File("nguoi_dung.xlsx"));
+
+            int userSelection = fileChooser.showSaveDialog(parentFrame);
+            if (userSelection == JFileChooser.APPROVE_OPTION) {
+                java.io.File saveFile = fileChooser.getSelectedFile();
+                try (java.io.BufferedInputStream in = new java.io.BufferedInputStream(new java.net.URL(downloadUrl).openStream());
+                    java.io.FileOutputStream fileOutputStream = new java.io.FileOutputStream(saveFile)) {
+
+                    byte[] dataBuffer = new byte[1024];
+                    int bytesRead;
+                    while ((bytesRead = in.read(dataBuffer, 0, 1024)) != -1) {
+                        fileOutputStream.write(dataBuffer, 0, bytesRead);
+                    }
+
+                    JOptionPane.showMessageDialog(parentFrame, "Tải xuống thành công: " + saveFile.getAbsolutePath());
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(parentFrame, "Lỗi khi tải file: " + ex.getMessage());
+                }
+            }
+        });
+
         searchPanel.add(new JLabel("Tìm kiếm nhà sản xuất"));
         searchPanel.add(Box.createHorizontalStrut(5));
         searchPanel.add(searchField);
