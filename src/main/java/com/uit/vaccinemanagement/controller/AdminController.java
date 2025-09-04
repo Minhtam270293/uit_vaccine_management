@@ -1,115 +1,295 @@
 package com.uit.vaccinemanagement.controller;
 
 import com.uit.vaccinemanagement.model.*;
+import com.uit.vaccinemanagement.dao.*;
+import java.sql.SQLException;
 import java.util.*;
 
 public class AdminController {
 
-    private List<Vaccine> vaccines = new ArrayList<>();
-    private List<Benh> benhs = new ArrayList<>();
-    private List<NhaSanXuat> nhaSanXuats = new ArrayList<>();
-    private List<TiemChung> tiemChungs = new ArrayList<>();
-    private List<ThongTinMua> giaoDichMuas = new ArrayList<>();
+    private static final int DEFAULT_PAGE = 1;
+    private static final int DEFAULT_PAGE_SIZE = 20;
 
-    // Vaccine management
-    public void addVaccine(Vaccine v) {
-        vaccines.add(v);
-        System.out.println("Vaccine added: " + v.getTenVaccine());
+    private final NguoiDungDAO nguoiDungDAO;
+    private final VaccineDAO vaccineDAO;
+    private final NhaSanXuatDAO nhaSanXuatDAO;
+
+    public AdminController() {
+        this.nguoiDungDAO = new NguoiDungDAO();
+        this.vaccineDAO = new VaccineDAO();
+        this.nhaSanXuatDAO = new NhaSanXuatDAO();
     }
 
-    public void editVaccine(int index, Vaccine v) {
-        if (index >= 0 && index < vaccines.size()) {
-            vaccines.set(index, v);
-            System.out.println("Vaccine updated at index " + index);
+    // User Management Methods
+    public List<NguoiDung> getNguoiDungPage(int page, int pageSize) {
+        // Business logic: Handle pagination validation
+        if (page <= 0) {
+            page = 1;
         }
-    }
-
-    public void deleteVaccine(int index) {
-        if (index >= 0 && index < vaccines.size()) {
-            vaccines.remove(index);
-            System.out.println("Vaccine deleted at index " + index);
+        if (pageSize <= 0) {
+            pageSize = DEFAULT_PAGE_SIZE;
         }
+
+        return nguoiDungDAO.getNguoiDungPage(page, pageSize);
     }
 
-    public void listVaccines() {
-        System.out.println("--- Vaccine List ---");
-        for (Vaccine v : vaccines) {
-            System.out.println(v.getTenVaccine());
+    // NhaSanXuat Management Methods
+    public List<NhaSanXuat> getNhaSanXuatPage(int page, int pageSize) {
+        // Business logic: Handle pagination validation
+        if (page <= 0) {
+            page = DEFAULT_PAGE;
         }
-    }
-
-    // Benh management
-    public void addBenh(Benh b) {
-        benhs.add(b);
-        System.out.println("Benh added: " + b.getTenBenh());
-    }
-
-    public void editBenh(int index, Benh b) {
-        if (index >= 0 && index < benhs.size()) {
-            benhs.set(index, b);
-            System.out.println("Benh updated at index " + index);
+        if (pageSize <= 0) {
+            pageSize = DEFAULT_PAGE_SIZE;
         }
+
+        return nhaSanXuatDAO.getNhaSanXuatPage(page, pageSize);
     }
 
-    public void deleteBenh(int index) {
-        if (index >= 0 && index < benhs.size()) {
-            benhs.remove(index);
-            System.out.println("Benh deleted at index " + index);
+    // Default page handling
+    public List<NhaSanXuat> getDefaultNhaSanXuatPage() {
+        return getNhaSanXuatPage(DEFAULT_PAGE, DEFAULT_PAGE_SIZE);
+    }
+
+    public int getNhaSanXuatCount() {
+        return nhaSanXuatDAO.getNhaSanXuatCount();
+    }
+
+    // Vaccine Management Methods
+    public List<Vaccine> getVaccinePage(int page, int pageSize) {
+        // Business logic: Handle pagination validation
+        if (page <= 0) page = DEFAULT_PAGE;
+        if (pageSize <= 0) pageSize = DEFAULT_PAGE_SIZE;
+        
+        return vaccineDAO.getVaccinePage(page, pageSize);
+    }
+
+    public List<Vaccine> getDefaultVaccinePage() {
+        return getVaccinePage(DEFAULT_PAGE, DEFAULT_PAGE_SIZE);
+    }
+
+    public int getVaccineCount() {
+        return vaccineDAO.getVaccineCount();
+    }
+
+    // Default page handling moved from DAO
+    public List<NguoiDung> getDefaultNguoiDungPage() {
+        return getNguoiDungPage(DEFAULT_PAGE, DEFAULT_PAGE_SIZE);
+    }
+
+    // Get all users with basic validation
+    public List<NguoiDung> getAllNguoiDung() {
+        // Retrieve all users from DAO
+        List<NguoiDung> users = nguoiDungDAO.getAllNguoiDung();
+
+        // Basic validation and filtering if needed
+        return users.stream()
+                .filter(u -> u != null && u.getMaNguoiDung() != null)
+                .toList();
+    }
+
+    // User validation and error handling
+    public boolean addNguoiDung(NguoiDung nguoiDung) {
+        // Business validation
+        if (nguoiDung == null) {
+            throw new IllegalArgumentException("User cannot be null");
         }
-    }
 
-    public void listBenhs() {
-        System.out.println("--- Benh List ---");
-        for (Benh b : benhs) {
-            System.out.println(b.getTenBenh());
+        if (nguoiDung.getHoTen() == null || nguoiDung.getHoTen().trim().isEmpty()) {
+            throw new IllegalArgumentException("Name is required");
         }
-    }
-
-    // Nha San Xuat management
-    public void addNhaSanXuat(NhaSanXuat n) {
-        nhaSanXuats.add(n);
-        System.out.println("Nha San Xuat added: " + n.getTenNhaSX());
-    }
-
-    public void editNhaSanXuat(int index, NhaSanXuat n) {
-        if (index >= 0 && index < nhaSanXuats.size()) {
-            nhaSanXuats.set(index, n);
-            System.out.println("Nha San Xuat updated at index " + index);
+        if (nguoiDung.getTenDangNhap() == null || nguoiDung.getTenDangNhap().trim().isEmpty()) {
+            throw new IllegalArgumentException("Username is required");
         }
-    }
-
-    public void deleteNhaSanXuat(int index) {
-        if (index >= 0 && index < nhaSanXuats.size()) {
-            nhaSanXuats.remove(index);
-            System.out.println("Nha San Xuat deleted at index " + index);
+        if (nguoiDung.getEmail() == null || nguoiDung.getEmail().trim().isEmpty()) {
+            throw new IllegalArgumentException("Email is required");
         }
-    }
-
-    public void listNhaSanXuats() {
-        System.out.println("--- Nha San Xuat List ---");
-        for (NhaSanXuat n : nhaSanXuats) {
-            System.out.println(n.getTenNhaSX());
+        if (nguoiDung.getMatKhau() == null || nguoiDung.getMatKhau().trim().isEmpty()) {
+            throw new IllegalArgumentException("Password is required");
         }
-    }
-
-    // Thong Tin Tiem Chung management
-    public void listThongTinTiemChung() {
-        System.out.println("--- Thong Tin Tiem Chung List ---");
-        for (TiemChung t : tiemChungs) {
-            System.out.println(t.getMaTiemChung());
+        if (nguoiDung.getVaiTro() == null) {
+            throw new IllegalArgumentException("Role is required");
         }
-    }
-
-    // Giao Dich Mua Vaccine management
-    public void listGiaoDichMuaVaccine() {
-        System.out.println("--- Giao Dich Mua Vaccine List ---");
-        for (ThongTinMua g : giaoDichMuas) {
-            System.out.println(g.getMaGiaoDich());
+        if (nguoiDung.getNgaySinh() == null) {
+            throw new IllegalArgumentException("Birth date is required");
         }
+        if (nguoiDung.getGioiTinh() == null || nguoiDung.getGioiTinh().trim().isEmpty()) {
+            throw new IllegalArgumentException("Gender is required");
+        }
+        if (nguoiDung.getNgayTao() == null) {
+            nguoiDung.setNgayTao(new java.sql.Timestamp(System.currentTimeMillis()));
+        }
+
+        // Additional validations for data format/quality
+        if (!nguoiDung.getEmail().matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+            throw new IllegalArgumentException("Invalid email format");
+        }
+        if (!nguoiDung.getGioiTinh().matches("^(Nam|Nữ)$")) {
+            throw new IllegalArgumentException("Gender must be either 'Nam' or 'Nữ'");
+        }
+        if (nguoiDung.getNgaySinh().after(new java.sql.Date(System.currentTimeMillis()))) {
+            throw new IllegalArgumentException("Birth date cannot be in the future");
+        }
+
+        return nguoiDungDAO.addNguoiDung(nguoiDung);
     }
 
-    // Edit personal info
-    public void editPersonalInfo() {
-        System.out.println("Edit personal info feature");
+    public boolean updateNguoiDung(NguoiDung nguoiDung) {
+        // Business validation
+        if (nguoiDung == null || nguoiDung.getMaNguoiDung() == null) {
+            throw new IllegalArgumentException("Invalid user data");
+        }
+        if (nguoiDung.getHoTen() == null || nguoiDung.getHoTen().trim().isEmpty()) {
+            throw new IllegalArgumentException("Name is required");
+        }
+
+        return nguoiDungDAO.updateNguoiDung(nguoiDung);
+    }
+
+    public boolean deleteNguoiDung(String maNguoiDung) {
+        // Business validation
+        if (maNguoiDung == null || maNguoiDung.trim().isEmpty()) {
+            throw new IllegalArgumentException("User ID is required");
+        }
+
+        return nguoiDungDAO.deleteNguoiDung(maNguoiDung);
+    }
+
+    // Vaccine Management Methods
+    public List<Vaccine> getAllVaccine() {
+        // Retrieve all vaccines from DAO
+        List<Vaccine> vaccines = vaccineDAO.getAllVaccine();
+
+        // Basic validation and filtering
+        return vaccines.stream()
+                .filter(v -> v != null && v.getMaVaccine() != null)
+                .toList();
+    }
+
+    public List<Object[]> getAllVaccineAsObjectArray() {
+        // Business validation if needed
+        return vaccineDAO.getAllVaccineAsObjectArray();
+    }
+
+    public boolean addVaccine(Vaccine vaccine) {
+        // Business validation
+        if (vaccine == null) {
+            throw new IllegalArgumentException("Vaccine cannot be null");
+        }
+        if (vaccine.getTenVaccine() == null || vaccine.getTenVaccine().trim().isEmpty()) {
+            throw new IllegalArgumentException("Vaccine name is required");
+        }
+        if (vaccine.getNgayHetHan() != null && vaccine.getNgaySX() != null
+                && vaccine.getNgayHetHan().before(vaccine.getNgaySX())) {
+            throw new IllegalArgumentException("Expiry date must be after manufacture date");
+        }
+        if (vaccine.getTongSL() < 0 || vaccine.getSlConLai() < 0) {
+            throw new IllegalArgumentException("Quantities cannot be negative");
+        }
+        if (vaccine.getSlConLai() > vaccine.getTongSL()) {
+            throw new IllegalArgumentException("Remaining quantity cannot exceed total quantity");
+        }
+        if (vaccine.getGiaNhap() < 0 || vaccine.getGiaBan() < 0) {
+            throw new IllegalArgumentException("Prices cannot be negative");
+        }
+
+        return vaccineDAO.addVaccine(vaccine);
+    }
+
+    public boolean updateVaccine(Vaccine vaccine) {
+        // Business validation
+        if (vaccine == null || vaccine.getMaVaccine() == null) {
+            throw new IllegalArgumentException("Invalid vaccine data");
+        }
+        if (vaccine.getTenVaccine() == null || vaccine.getTenVaccine().trim().isEmpty()) {
+            throw new IllegalArgumentException("Vaccine name is required");
+        }
+        if (vaccine.getNgayHetHan() != null && vaccine.getNgaySX() != null
+                && vaccine.getNgayHetHan().before(vaccine.getNgaySX())) {
+            throw new IllegalArgumentException("Expiry date must be after manufacture date");
+        }
+        if (vaccine.getTongSL() < 0 || vaccine.getSlConLai() < 0) {
+            throw new IllegalArgumentException("Quantities cannot be negative");
+        }
+        if (vaccine.getSlConLai() > vaccine.getTongSL()) {
+            throw new IllegalArgumentException("Remaining quantity cannot exceed total quantity");
+        }
+        if (vaccine.getGiaNhap() < 0 || vaccine.getGiaBan() < 0) {
+            throw new IllegalArgumentException("Prices cannot be negative");
+        }
+
+        return vaccineDAO.updateVaccine(vaccine);
+    }
+
+    public boolean deleteVaccine(String maVaccine) {
+        // Business validation
+        if (maVaccine == null || maVaccine.trim().isEmpty()) {
+            throw new IllegalArgumentException("Vaccine ID is required");
+        }
+
+        return vaccineDAO.deleteVaccine(maVaccine);
+    }
+
+    // NhaSanXuat Management Methods
+    public List<NhaSanXuat> getAllNhaSanXuat() {
+        // Retrieve all manufacturers from DAO
+        List<NhaSanXuat> manufacturers = nhaSanXuatDAO.getAllNhaSanXuat();
+
+        // Basic validation and filtering
+        return manufacturers.stream()
+                .filter(n -> n != null && n.getMaNhaSX() != null)
+                .toList();
+    }
+
+    public List<Object[]> getAllNhaSanXuatAsObjectArray() {
+        // Business validation if needed
+        return nhaSanXuatDAO.getAllNhaSanXuatAsObjectArray();
+    }
+
+    public boolean addNhaSanXuat(NhaSanXuat nhaSanXuat) {
+        // Business validation
+        if (nhaSanXuat == null) {
+            throw new IllegalArgumentException("Manufacturer cannot be null");
+        }
+        if (nhaSanXuat.getTenNhaSX() == null || nhaSanXuat.getTenNhaSX().trim().isEmpty()) {
+            throw new IllegalArgumentException("Manufacturer name is required");
+        }
+        if (nhaSanXuat.getQuocGia() == null || nhaSanXuat.getQuocGia().trim().isEmpty()) {
+            throw new IllegalArgumentException("Country is required");
+        }
+
+        return nhaSanXuatDAO.addNhaSanXuat(nhaSanXuat);
+    }
+
+    public boolean updateNhaSanXuat(NhaSanXuat nhaSanXuat) {
+        // Business validation
+        if (nhaSanXuat == null || nhaSanXuat.getMaNhaSX() == null) {
+            throw new IllegalArgumentException("Invalid manufacturer data");
+        }
+        if (nhaSanXuat.getTenNhaSX() == null || nhaSanXuat.getTenNhaSX().trim().isEmpty()) {
+            throw new IllegalArgumentException("Manufacturer name is required");
+        }
+        if (nhaSanXuat.getQuocGia() == null || nhaSanXuat.getQuocGia().trim().isEmpty()) {
+            throw new IllegalArgumentException("Country is required");
+        }
+
+        return nhaSanXuatDAO.updateNhaSanXuat(nhaSanXuat);
+    }
+
+    public boolean deleteNhaSanXuat(String maNhaSX) {
+        // Business validation
+        if (maNhaSX == null || maNhaSX.trim().isEmpty()) {
+            throw new IllegalArgumentException("Manufacturer ID is required");
+        }
+
+        // Additional business logic: Check if any vaccines are using this manufacturer
+        List<Vaccine> relatedVaccines = getAllVaccine().stream()
+                .filter(v -> maNhaSX.equals(v.getMaNhaSX()))
+                .toList();
+        if (!relatedVaccines.isEmpty()) {
+            throw new IllegalArgumentException("Cannot delete manufacturer: There are vaccines associated with it");
+        }
+
+        return nhaSanXuatDAO.deleteNhaSanXuat(maNhaSX);
     }
 }
