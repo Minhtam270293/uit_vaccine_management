@@ -61,6 +61,27 @@ public class NhaSanXuatPanel extends JPanel {
         JButton btnAdd = new JButton("Thêm");
         JButton btnDownload = new JButton("Tải xuống");
 
+        // xử lý tìm kiếm
+        btnSearch.addActionListener(e -> {
+            String keyword = searchField.getText().trim().toLowerCase();
+            if (keyword.isEmpty()) {
+                loadData(); // nếu để trống thì load lại toàn bộ
+                return;
+            }
+
+            List<NhaSanXuat> filteredList = adminController.getAllNhaSanXuat().stream()
+                    .filter(nsx -> nsx.getMaNhaSX().toLowerCase().contains(keyword)
+                            || nsx.getTenNhaSX().toLowerCase().contains(keyword)
+                            || nsx.getQuocGia().toLowerCase().contains(keyword))
+                    .toList();
+
+            updateTable(filteredList);
+            lblTotalRows.setText("Tìm thấy: " + filteredList.size() + " kết quả");
+            lblPageInfo.setText("Trang 1/1");
+            btnPrev.setEnabled(false);
+            btnNext.setEnabled(false);
+        });
+
         btnAdd.addActionListener(e -> {
             JButton refreshButton = new JButton();
             refreshButton.addActionListener(ev -> loadData());

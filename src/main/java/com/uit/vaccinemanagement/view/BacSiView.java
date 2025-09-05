@@ -195,7 +195,7 @@ public class BacSiView {
         // -----------------------------------------------------------------------------------------------------------
         // Danh sách tiêm chủng
         btnTiemChung.addActionListener((ActionEvent e) -> {
-            frame.setSize(1150, 500);
+            frame.setSize(1180, 500);
             TiemChungPanel tiemChungPanel = new TiemChungPanel(frame, bacSiController, currentUser);
 
             // Replace content in right panel
@@ -211,8 +211,13 @@ public class BacSiView {
             tableTitle.setText("QUẢN LÝ KHÁCH HÀNG");
             List<NguoiDung> khachList = bacSiController.getDefaultKhachHangPage();
 
-            String[] columns = {"Mã KH", "Họ Tên", "Tên đăng nhập", "Email", "Vai trò", "Ngày tạo", "Ngày sinh", "Giới tính"};
-            DefaultTableModel model = new DefaultTableModel(columns, 0);
+            String[] columns = {"Mã KH", "Họ Tên", "Tên đăng nhập", "Email", "Vai trò", "Ngày tạo", "Ngày sinh", "Giới tính", "Thao tác"};
+            DefaultTableModel model = new DefaultTableModel(columns, 0) {
+                @Override
+                public boolean isCellEditable(int row, int column) {
+                    return column == 8; // chỉ cho phép edit cột Thao tác
+                }
+            };
 
             for (NguoiDung nd : khachList) {
                 model.addRow(new Object[]{
@@ -223,7 +228,8 @@ public class BacSiView {
                     nd.getVaiTro(),
                     nd.getNgayTao(),
                     nd.getNgaySinh(),
-                    nd.getGioiTinh()
+                    nd.getGioiTinh(),
+                    "Thao tác"
                 });
             }
 
@@ -249,6 +255,7 @@ public class BacSiView {
             columnModel.getColumn(5).setPreferredWidth(100);  // Ngày tạo
             columnModel.getColumn(6).setPreferredWidth(100);  // Ngày sinh
             columnModel.getColumn(7).setPreferredWidth(80);   // Giới tính
+            columnModel.getColumn(8).setPreferredWidth(120);  // Thao tác
 
             // Renderer căn giữa cho mấy cột mã + vai trò + ngày sinh + giới tính
             DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
@@ -257,6 +264,75 @@ public class BacSiView {
             newTable.getColumnModel().getColumn(4).setCellRenderer(centerRenderer); // Vai trò
             newTable.getColumnModel().getColumn(6).setCellRenderer(centerRenderer); // Ngày sinh
             newTable.getColumnModel().getColumn(7).setCellRenderer(centerRenderer); // Giới tính
+
+            // --- Thêm nút Edit + Delete ---
+            TableColumn actionColumn = newTable.getColumnModel().getColumn(8);
+            actionColumn.setCellRenderer(new TableCellRenderer() {
+                private final JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
+                private final JButton btnEdit = new JButton("✎");
+                private final JButton btnDelete = new JButton("🗑");
+
+                {
+                    btnEdit.setPreferredSize(new Dimension(50, 25));
+                    btnDelete.setPreferredSize(new Dimension(50, 25));
+                    panel.add(btnEdit);
+                    panel.add(btnDelete);
+                }
+
+                @Override
+                public Component getTableCellRendererComponent(JTable table, Object value,
+                                                            boolean isSelected, boolean hasFocus, int row, int column) {
+                    return panel;
+                }
+            });
+
+            actionColumn.setCellEditor(new DefaultCellEditor(new JCheckBox()) {
+                private final JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
+                private final JButton btnEdit = new JButton("✎");
+                private final JButton btnDelete = new JButton("🗑");
+
+                {
+                    btnEdit.setPreferredSize(new Dimension(50, 25));
+                    btnDelete.setPreferredSize(new Dimension(50, 25));
+                    panel.add(btnEdit);
+                    panel.add(btnDelete);
+
+                    btnEdit.addActionListener(ev -> {
+                        int row = newTable.getSelectedRow();
+                        if (row != -1) {
+                            String maKH = newTable.getValueAt(row, 0).toString();
+                            JOptionPane.showMessageDialog(frame, "Edit khách hàng: " + maKH);
+                            // TODO: Mở dialog edit khách hàng ở đây
+                        }
+                    });
+
+                    btnDelete.addActionListener(ev -> {
+                        int row = newTable.getSelectedRow();
+                        if (row != -1) {
+                            String maKH = newTable.getValueAt(row, 0).toString();
+                            int confirm = JOptionPane.showConfirmDialog(frame,
+                                    "Xóa khách hàng " + maKH + " ?",
+                                    "Xác nhận",
+                                    JOptionPane.YES_NO_OPTION);
+                            if (confirm == JOptionPane.YES_OPTION) {
+                                // TODO: gọi bacSiController.deleteKhachHang(maKH)
+                                JOptionPane.showMessageDialog(frame, "Đã xóa khách hàng: " + maKH);
+                            }
+                        }
+                    });
+                }
+
+                @Override
+                public Component getTableCellEditorComponent(JTable table, Object value,
+                                                            boolean isSelected, int row, int column) {
+                    return panel;
+                }
+
+                @Override
+                public Object getCellEditorValue() {
+                    return "";
+                }
+            });
 
             JScrollPane newScrollPane = new JScrollPane(newTable);
 
@@ -268,6 +344,7 @@ public class BacSiView {
             rightPanel.repaint();
             rightPanel.add(paginationPanel, BorderLayout.SOUTH);
         });
+
 
         frame.setVisible(true);
     }

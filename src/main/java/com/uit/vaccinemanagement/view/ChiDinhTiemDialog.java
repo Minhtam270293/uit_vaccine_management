@@ -3,7 +3,6 @@ package com.uit.vaccinemanagement.view;
 import com.uit.vaccinemanagement.controller.BacSiController;
 import com.uit.vaccinemanagement.model.NguoiDung;
 import com.uit.vaccinemanagement.model.TiemChung;
-import com.uit.vaccinemanagement.model.Vaccine;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,11 +10,11 @@ import java.util.List;
 
 public class ChiDinhTiemDialog extends JDialog {
     private final BacSiController bacSiController;
-    
+
     public ChiDinhTiemDialog(JFrame parent, NguoiDung currentUser, BacSiController bacSiController) {
         super(parent, "Tạo chỉ định tiêm", true);
         this.bacSiController = bacSiController;
-        setSize(500, 400);
+        setSize(500, 450);
 
         JPanel mainPanel = new JPanel(new BorderLayout());
         JPanel panel = new JPanel(new GridBagLayout()) {
@@ -44,6 +43,7 @@ public class ChiDinhTiemDialog extends JDialog {
         gbc.insets = new Insets(4, 8, 4, 8);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
+        // Khách hàng
         JLabel lblKhach = new JLabel("Khách hàng:");
         lblKhach.setFont(uiFont);
         JComboBox<String> cbKhach = new JComboBox<>();
@@ -56,19 +56,20 @@ public class ChiDinhTiemDialog extends JDialog {
         }
         cbKhach.setModel(khachModel);
 
+        // Vaccine
         JLabel lblVaccine = new JLabel("Vắc xin:");
         lblVaccine.setFont(uiFont);
         JComboBox<String> cbVaccine = new JComboBox<>();
         cbVaccine.setFont(uiFont);
         cbVaccine.setPreferredSize(textFieldSize);
         List<Object[]> vaccines = bacSiController.getAvailableVaccines();
-        
         for (Object[] v : vaccines) {
             String maVaccine = (String) v[0];
             String tenVaccine = (String) v[1];
             cbVaccine.addItem(maVaccine + " - " + tenVaccine);
         }
 
+        // Ngày tiêm
         JLabel lblNgayTiem = new JLabel("Ngày tiêm (yyyy-mm-dd):");
         lblNgayTiem.setFont(uiFont);
         JTextField tfNgayTiem = new JTextField();
@@ -81,6 +82,16 @@ public class ChiDinhTiemDialog extends JDialog {
             )
         );
 
+        // Trạng thái
+        JLabel lblTrangThai = new JLabel("Trạng thái:");
+        lblTrangThai.setFont(uiFont);
+        JComboBox<String> cbTrangThai = new JComboBox<>(new String[]{
+            "cho_tiem", "da_tiem", "hoan_tiem"
+        });
+        cbTrangThai.setFont(uiFont);
+        cbTrangThai.setPreferredSize(textFieldSize);
+
+        // Ghi chú
         JLabel lblGhiChu = new JLabel("Ghi chú:");
         lblGhiChu.setFont(uiFont);
         JTextArea taGhiChu = new JTextArea(3, 1);
@@ -106,11 +117,10 @@ public class ChiDinhTiemDialog extends JDialog {
             }
         };
         ghiChuScroll.setPreferredSize(new Dimension(textFieldSize.width, textFieldSize.height * 3));
-        ghiChuScroll.setBorder(BorderFactory.createEmptyBorder()); // Không bo viền mặc định, chỉ bo góc custom
+        ghiChuScroll.setBorder(BorderFactory.createEmptyBorder());
 
+        // Buttons
         Dimension buttonSizeChiDinh = new Dimension(120, 36);
-
-        // Sử dụng AuthButton để style giống SignUpView
         AuthButton btnTaoChiDinh = new AuthButton("Tạo chỉ định", new Color(210, 90, 22));
         btnTaoChiDinh.setPreferredSize(buttonSizeChiDinh);
         btnTaoChiDinh.setFont(btnFont);
@@ -124,6 +134,7 @@ public class ChiDinhTiemDialog extends JDialog {
         panelButtonChiDinh.add(btnTaoChiDinh);
         panelButtonChiDinh.add(btnHuy);
 
+        // Add to layout
         int row = 0;
         gbc.gridx = 0; gbc.gridy = row; panel.add(lblKhach, gbc);
         gbc.gridx = 1; gbc.gridy = row++; panel.add(cbKhach, gbc);
@@ -131,6 +142,8 @@ public class ChiDinhTiemDialog extends JDialog {
         gbc.gridx = 1; gbc.gridy = row++; panel.add(cbVaccine, gbc);
         gbc.gridx = 0; gbc.gridy = row; panel.add(lblNgayTiem, gbc);
         gbc.gridx = 1; gbc.gridy = row++; panel.add(tfNgayTiem, gbc);
+        gbc.gridx = 0; gbc.gridy = row; panel.add(lblTrangThai, gbc);
+        gbc.gridx = 1; gbc.gridy = row++; panel.add(cbTrangThai, gbc);
         gbc.gridx = 0; gbc.gridy = row; panel.add(lblGhiChu, gbc);
         gbc.gridx = 1; gbc.gridy = row++; panel.add(ghiChuScroll, gbc);
 
@@ -142,6 +155,7 @@ public class ChiDinhTiemDialog extends JDialog {
         mainPanel.add(panel, BorderLayout.CENTER);
         setContentPane(mainPanel);
 
+        // Actions
         btnHuy.addActionListener(ev -> dispose());
 
         btnTaoChiDinh.addActionListener(ev -> {
@@ -152,6 +166,7 @@ public class ChiDinhTiemDialog extends JDialog {
                 String maKhach = khachStr.split(" - ")[0];
                 String ngayTiemStr = tfNgayTiem.getText().trim();
                 java.sql.Date ngayTiem = java.sql.Date.valueOf(ngayTiemStr);
+                String trangThai = (String) cbTrangThai.getSelectedItem();
                 String ghiChu = taGhiChu.getText().trim();
 
                 java.sql.Date ngayChiDinh = new java.sql.Date(System.currentTimeMillis());
@@ -163,7 +178,7 @@ public class ChiDinhTiemDialog extends JDialog {
                     maKhach,
                     ngayChiDinh,
                     ngayTiem,
-                    "cho_tiem",
+                    trangThai,
                     ghiChu
                 );
                 try {
@@ -185,7 +200,7 @@ public class ChiDinhTiemDialog extends JDialog {
         setLocationRelativeTo(parent);
     }
 
-    // Thêm class RoundedBorder vào cuối file (hoặc import lại từ SignUpView nếu dùng chung)
+    // Rounded border helper class
     static class RoundedBorder extends javax.swing.border.AbstractBorder {
         private final Color color;
         private final int thickness;

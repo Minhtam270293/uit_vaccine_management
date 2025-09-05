@@ -65,7 +65,7 @@ public class AdminView {
     public void showAdminUI() {
         JFrame frame = new JFrame("Admin Dashboard");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(1600, 800);
+        frame.setSize(1700, 800);
 
         // Left panel (column 1)
         // Side Navigator
@@ -141,22 +141,22 @@ public class AdminView {
 
         btnNguoiDung.addActionListener(e -> {
             cardLayout.show(cardPanel, NGUOIDUNG_PANEL);
-            frame.setSize(1600, 800); // set cố định
+            frame.setSize(1700, 800); // set cố định
         });
 
         btnVaccine.addActionListener(e -> {
             cardLayout.show(cardPanel, VACCINE_PANEL);
-            frame.setSize(1525, 800);
+            frame.setSize(1570, 800);
         });
 
         btnBenh.addActionListener(e -> {
             cardLayout.show(cardPanel, BENH_PANEL);
-            frame.setSize(968, 800);
+            frame.setSize(1118, 800);
         });
 
         btnNhaSanXuat.addActionListener(e -> {
             cardLayout.show(cardPanel, NHASX_PANEL);
-            frame.setSize(968, 800);
+            frame.setSize(1018, 800);
         });
 
 

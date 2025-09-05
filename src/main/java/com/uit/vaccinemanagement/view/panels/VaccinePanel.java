@@ -80,6 +80,34 @@ public class VaccinePanel extends JPanel {
         JButton btnAdd = new JButton("Thêm");
         JButton btnDownload = new JButton("Tải xuống");
 
+        // ====== Sự kiện nút Tìm kiếm ======
+        btnSearch.addActionListener(e -> {
+            String keyword = searchField.getText().trim().toLowerCase();
+            List<Vaccine> vaccineList;
+
+            if (keyword.isEmpty()) {
+                // Nếu không nhập gì thì load lại phân trang bình thường
+                loadData();
+                return;
+            }
+
+            // Lọc danh sách theo keyword
+            vaccineList = adminController.getAllVaccine().stream()
+                    .filter(v -> v.getMaVaccine().toLowerCase().contains(keyword)
+                            || v.getTenVaccine().toLowerCase().contains(keyword)
+                            || v.getSoLo().toLowerCase().contains(keyword))
+                    .toList();
+
+            // Cập nhật bảng với danh sách đã lọc
+            updateTable(vaccineList);
+
+            // Tắt phân trang khi search
+            lblPageInfo.setText("Kết quả tìm kiếm");
+            lblTotalRows.setText("Tìm thấy: " + vaccineList.size());
+            btnPrev.setEnabled(false);
+            btnNext.setEnabled(false);
+        });
+
         btnAdd.addActionListener(e -> {
             JButton refreshButton = new JButton();
             refreshButton.addActionListener(ev -> loadData());

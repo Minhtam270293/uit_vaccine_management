@@ -68,6 +68,28 @@ public class NguoiDungPanel extends JPanel {
            NguoiDungAddDialog addDialog = new NguoiDungAddDialog(parentFrame, adminController, refreshButton);
            addDialog.setVisible(true);
        });
+
+        // Nút tìm kiếm
+        btnSearch.addActionListener(e -> {
+            String keyword = searchField.getText().trim().toLowerCase();
+            if (keyword.isEmpty()) {
+                loadData(); // nếu để trống thì load lại toàn bộ
+                return;
+            }
+
+            List<NguoiDung> filteredList = adminController.getAllNguoiDung().stream()
+                    .filter(nd -> nd.getHoTen().toLowerCase().contains(keyword)
+                            || nd.getTenDangNhap().toLowerCase().contains(keyword)
+                            || nd.getEmail().toLowerCase().contains(keyword))
+                    .toList();
+
+            updateTable(filteredList);
+            lblTotalRows.setText("Tìm thấy: " + filteredList.size() + " kết quả");
+            lblPageInfo.setText("Trang 1/1");
+            btnPrev.setEnabled(false);
+            btnNext.setEnabled(false);
+        });
+        
         searchPanel.add(new JLabel("Tìm kiếm người dùng"));
         searchPanel.add(Box.createHorizontalStrut(5));
         searchPanel.add(searchField);
