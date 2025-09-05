@@ -1,16 +1,13 @@
 package com.uit.vaccinemanagement.view.panels;
 
 import com.uit.vaccinemanagement.controller.AdminController;
-import com.uit.vaccinemanagement.model.NguoiDung;
-import com.uit.vaccinemanagement.util.Role;
-import com.uit.vaccinemanagement.view.NguoiDungAddDialog;
-
+import com.uit.vaccinemanagement.model.Benh;
 import javax.swing.*;
 import javax.swing.table.*;
 import java.awt.*;
 import java.util.List;
 
-public class NguoiDungPanel extends JPanel {
+public class BenhPanel extends JPanel {
 
     private final AdminController adminController;
     private final JFrame parentFrame;
@@ -21,8 +18,9 @@ public class NguoiDungPanel extends JPanel {
     private JLabel lblTotalRows;
     private JButton btnPrev;
     private JButton btnNext;
+    private String currentSearchTerm = "";
 
-    public NguoiDungPanel(JFrame parentFrame, AdminController adminController) {
+    public BenhPanel(JFrame parentFrame, AdminController adminController) {
         this.parentFrame = parentFrame;
         this.adminController = adminController;
         setLayout(new BorderLayout());
@@ -31,7 +29,7 @@ public class NguoiDungPanel extends JPanel {
     }
 
     private void initializeComponents() {
-        // Header panel with title and search
+        // Header panel with title and controls
         JPanel headerPanel = createHeaderPanel();
         add(headerPanel, BorderLayout.NORTH);
 
@@ -49,7 +47,7 @@ public class NguoiDungPanel extends JPanel {
         JPanel headerPanel = new JPanel(new BorderLayout());
 
         // Title
-        JLabel tableTitle = new JLabel("QUẢN LÝ NGƯỜI DÙNG", SwingConstants.CENTER);
+        JLabel tableTitle = new JLabel("QUẢN LÝ BỆNH", SwingConstants.CENTER);
         tableTitle.setFont(new Font("Arial", Font.BOLD, 18));
         tableTitle.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
 
@@ -62,13 +60,35 @@ public class NguoiDungPanel extends JPanel {
         JButton btnAdd = new JButton("Thêm");
         JButton btnDownload = new JButton("Tải xuống");
 
-       btnAdd.addActionListener(e -> {
-           JButton refreshButton = new JButton();
-           refreshButton.addActionListener(ev -> loadData());
-           NguoiDungAddDialog addDialog = new NguoiDungAddDialog(parentFrame, adminController, refreshButton);
-           addDialog.setVisible(true);
-       });
-        searchPanel.add(new JLabel("Tìm kiếm người dùng"));
+        btnSearch.addActionListener(e -> {
+            currentPage = 1;  // Reset to first page when searching
+            String searchTerm = searchField.getText().trim();
+            if (searchTerm.isEmpty()) {
+                loadData();
+            } else {
+                List<Benh> searchResults = adminController.searchBenhByName(currentPage, pageSize, searchTerm);
+                updateTable(searchResults);
+            }
+        });
+
+        btnAdd.addActionListener(e -> showAddDialog());
+
+        btnDownload.addActionListener(e -> {
+            // File chooser for saving Excel file
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setDialogTitle("Chọn nơi lưu file");
+            fileChooser.setSelectedFile(new java.io.File("danh_sach_benh.xlsx"));
+
+            int userSelection = fileChooser.showSaveDialog(parentFrame);
+            if (userSelection == JFileChooser.APPROVE_OPTION) {
+                java.io.File fileToSave = fileChooser.getSelectedFile();
+                JOptionPane.showMessageDialog(parentFrame, 
+                    "Tính năng xuất Excel sẽ được cài đặt sau\nFile sẽ được lưu tại: " + 
+                    fileToSave.getAbsolutePath());
+            }
+        });
+
+        searchPanel.add(new JLabel("Tìm kiếm bệnh"));
         searchPanel.add(Box.createHorizontalStrut(5));
         searchPanel.add(searchField);
         searchPanel.add(Box.createHorizontalStrut(10));
@@ -100,7 +120,12 @@ public class NguoiDungPanel extends JPanel {
         });
 
         btnNext.addActionListener(e -> {
-            int totalRows = adminController.getAllNguoiDung().size();
+            int totalRows;
+            if (currentSearchTerm != null && !currentSearchTerm.trim().isEmpty()) {
+                totalRows = adminController.getTotalBenhSearchResults(currentSearchTerm);
+            } else {
+                totalRows = adminController.getTotalBenh();
+            }
             int totalPages = (int) Math.ceil((double) totalRows / pageSize);
             if (currentPage < totalPages) {
                 currentPage++;
@@ -117,40 +142,49 @@ public class NguoiDungPanel extends JPanel {
     }
 
     private void loadData() {
-        List<NguoiDung> userList = adminController.getNguoiDungPage(currentPage, pageSize);
-        updateTable(userList);
+        List<Benh> list;
+        if (currentSearchTerm != null && !currentSearchTerm.trim().isEmpty()) {
+            list = adminController.searchBenhByName(currentPage, pageSize, currentSearchTerm);
+        } else {
+            list = adminController.getBenhPage(currentPage, pageSize);
+        }
+        updateTable(list);
         updatePaginationInfo();
     }
 
     private void updatePaginationInfo() {
-        int totalRows = adminController.getAllNguoiDung().size();
+        int totalRows;
+        if (currentSearchTerm != null && !currentSearchTerm.trim().isEmpty()) {
+            totalRows = adminController.getTotalBenhSearchResults(currentSearchTerm);
+        } else {
+            totalRows = adminController.getTotalBenh();
+        }
+        
         int totalPages = (int) Math.ceil((double) totalRows / pageSize);
+        
         if (currentPage > totalPages) {
             currentPage = totalPages;
         }
         if (currentPage < 1) {
             currentPage = 1;
         }
+        
         lblPageInfo.setText("Trang " + currentPage + "/" + (totalPages == 0 ? 1 : totalPages));
         lblTotalRows.setText("Tổng số: " + totalRows);
         btnPrev.setEnabled(currentPage > 1);
         btnNext.setEnabled(currentPage < totalPages);
     }
 
-    private void updateTable(List<NguoiDung> userList) {
-        String[] columns = {"Mã ND", "Họ tên", "Tên đăng nhập", "Email", "Vai trò", "Ngày tạo", "Ngày sinh", "Giới tính", "Thao tác"};
+    private void updateTable(List<Benh> benhList) {
+        String[] columns = {"Mã bệnh", "Tên bệnh", "Mô tả", "Ngày tạo", "Thao tác"};
         DefaultTableModel model = new DefaultTableModel(columns, 0);
 
-        for (NguoiDung nd : userList) {
+        for (Benh benh : benhList) {
             model.addRow(new Object[]{
-                nd.getMaNguoiDung(),
-                nd.getHoTen(),
-                nd.getTenDangNhap(),
-                nd.getEmail(),
-                nd.getVaiTro(),
-                nd.getNgayTao(),
-                nd.getNgaySinh(),
-                nd.getGioiTinh(),
+                benh.getMaBenh(),
+                benh.getTenBenh(),
+                benh.getMoTa(),
+                benh.getNgayTao(),
                 "Thao tác"
             });
         }
@@ -163,25 +197,22 @@ public class NguoiDungPanel extends JPanel {
         table.setRowHeight(30);
 
         // Set up the action column
-        TableColumn actionColumn = table.getColumnModel().getColumn(8);
+        TableColumn actionColumn = table.getColumnModel().getColumn(4);
         actionColumn.setCellRenderer(new ButtonRenderer());
         actionColumn.setCellEditor(new ButtonEditor(new JCheckBox()));
 
         // Setup column widths
         TableColumnModel columnModel = table.getColumnModel();
-        columnModel.getColumn(0).setPreferredWidth(50);
-        columnModel.getColumn(1).setPreferredWidth(100);
-        columnModel.getColumn(2).setPreferredWidth(120);
-        columnModel.getColumn(3).setPreferredWidth(200);
-        columnModel.getColumn(4).setPreferredWidth(80);
-        columnModel.getColumn(5).setPreferredWidth(100);
-        columnModel.getColumn(6).setPreferredWidth(100);
-        columnModel.getColumn(7).setPreferredWidth(80);
+        columnModel.getColumn(0).setPreferredWidth(80);  // Mã bệnh
+        columnModel.getColumn(1).setPreferredWidth(150); // Tên bệnh
+        columnModel.getColumn(2).setPreferredWidth(200); // Mô tả
+        columnModel.getColumn(3).setPreferredWidth(120); // Ngày tạo
+        columnModel.getColumn(4).setPreferredWidth(100); // Thao tác
 
         // Center align specific columns
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
         centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
-        int[] centerColumns = {0, 1, 4, 6, 7};
+        int[] centerColumns = {0, 3};
         for (int col : centerColumns) {
             table.getColumnModel().getColumn(col).setCellRenderer(centerRenderer);
         }
@@ -193,9 +224,57 @@ public class NguoiDungPanel extends JPanel {
         header.setResizingAllowed(true);
     }
 
+    private void showAddDialog() {
+        JDialog dialog = new JDialog(parentFrame, "Thêm bệnh mới", true);
+        dialog.setLayout(new GridLayout(0, 2, 5, 5));
+        dialog.setSize(400, 200);
+
+        JTextField tfMaBenh = new JTextField();
+        JTextField tfTenBenh = new JTextField();
+        JTextField tfMoTa = new JTextField();
+
+        dialog.add(new JLabel("Mã bệnh:"));
+        dialog.add(tfMaBenh);
+        dialog.add(new JLabel("Tên bệnh:"));
+        dialog.add(tfTenBenh);
+        dialog.add(new JLabel("Mô tả:"));
+        dialog.add(tfMoTa);
+
+        JButton btnSave = new JButton("Lưu");
+        JButton btnCancel = new JButton("Hủy");
+
+        btnSave.addActionListener(e -> {
+            String maBenh = tfMaBenh.getText().trim();
+            String tenBenh = tfTenBenh.getText().trim();
+            String moTa = tfMoTa.getText().trim();
+
+            if (maBenh.isEmpty() || tenBenh.isEmpty()) {
+                JOptionPane.showMessageDialog(dialog, "Vui lòng nhập đầy đủ thông tin!");
+                return;
+            }
+
+            Benh benh = new Benh(maBenh, tenBenh, moTa, new java.sql.Timestamp(System.currentTimeMillis()));
+
+            if (adminController.addBenh(benh)) {
+                JOptionPane.showMessageDialog(dialog, "Thêm bệnh thành công!");
+                dialog.dispose();
+                loadData();
+            } else {
+                JOptionPane.showMessageDialog(dialog, "Thêm bệnh thất bại!");
+            }
+        });
+
+        btnCancel.addActionListener(e -> dialog.dispose());
+
+        dialog.add(btnSave);
+        dialog.add(btnCancel);
+
+        dialog.setLocationRelativeTo(parentFrame);
+        dialog.setVisible(true);
+    }
+
     // Custom renderer for the action column
     private class ButtonRenderer implements TableCellRenderer {
-
         private final JPanel panel;
         private final JButton btnEdit;
         private final JButton btnDelete;
@@ -221,10 +300,10 @@ public class NguoiDungPanel extends JPanel {
 
     // Custom editor for the action column
     private class ButtonEditor extends DefaultCellEditor {
-
         private final JPanel panel;
         private final JButton btnEdit;
         private final JButton btnDelete;
+        private String maBenh;
 
         public ButtonEditor(JCheckBox checkBox) {
             super(checkBox);
@@ -235,82 +314,65 @@ public class NguoiDungPanel extends JPanel {
             btnEdit.setPreferredSize(new Dimension(50, 25));
             btnDelete.setPreferredSize(new Dimension(50, 25));
 
-            panel.add(btnEdit);
-            panel.add(btnDelete);
+            btnEdit.addActionListener(e -> {
+                fireEditingStopped();
+                showEditDialog(adminController.getAllBenh().stream()
+                    .filter(b -> b.getMaBenh().equals(maBenh))
+                    .findFirst()
+                    .orElse(null));
+            });
 
-            btnEdit.addActionListener(e -> editUser());
-            btnDelete.addActionListener(e -> deleteUser());
-        }
-
-        private void editUser() {
-            int row = table.getSelectedRow();
-            if (row != -1) {
-                String maNguoiDung = table.getValueAt(row, 0).toString();
-                NguoiDung nd = adminController.getAllNguoiDung().stream()
-                        .filter(u -> u.getMaNguoiDung().equals(maNguoiDung))
-                        .findFirst().orElse(null);
-
-                if (nd != null) {
-                    showEditDialog(nd);
-                }
-            }
-        }
-
-        private void deleteUser() {
-            int row = table.getSelectedRow();
-            if (row != -1) {
-                String maNguoiDung = table.getValueAt(row, 0).toString();
-                int confirm = JOptionPane.showConfirmDialog(parentFrame,
-                        "Xóa người dùng " + maNguoiDung + " ?",
-                        "Xác nhận",
-                        JOptionPane.YES_NO_OPTION);
+            btnDelete.addActionListener(e -> {
+                fireEditingStopped();
+                int confirm = JOptionPane.showConfirmDialog(
+                    parentFrame,
+                    "Bạn có chắc chắn muốn xóa bệnh này?",
+                    "Xác nhận xóa",
+                    JOptionPane.YES_NO_OPTION
+                );
 
                 if (confirm == JOptionPane.YES_OPTION) {
-                    if (adminController.deleteNguoiDung(maNguoiDung)) {
+                    if (adminController.deleteBenh(maBenh)) {
                         JOptionPane.showMessageDialog(parentFrame, "Xóa thành công!");
                         loadData();
                     } else {
                         JOptionPane.showMessageDialog(parentFrame, "Xóa thất bại!");
                     }
                 }
-            }
+            });
+
+            panel.add(btnEdit);
+            panel.add(btnDelete);
         }
 
-        private void showEditDialog(NguoiDung nd) {
-            JDialog editDialog = new JDialog(parentFrame, "Sửa người dùng", true);
-            editDialog.setSize(400, 300);
+        private void showEditDialog(Benh benh) {
+            if (benh == null) return;
+
+            JDialog editDialog = new JDialog(parentFrame, "Sửa thông tin bệnh", true);
             editDialog.setLayout(new GridLayout(0, 2, 5, 5));
+            editDialog.setSize(400, 200);
 
-            JTextField tfHoTen = new JTextField(nd.getHoTen());
-            JTextField tfEmail = new JTextField(nd.getEmail());
-            JTextField tfTenDangNhap = new JTextField(nd.getTenDangNhap());
-            JTextField tfNgaySinh = new JTextField(nd.getNgaySinh() != null ? nd.getNgaySinh().toString() : "");
-            JComboBox<String> cbVaiTro = new JComboBox<>(new String[]{"ADMIN", "BACSI", "KHACH"});
-            cbVaiTro.setSelectedItem(nd.getVaiTro().name());
+            JTextField tfTenBenh = new JTextField(benh.getTenBenh());
+            JTextField tfMoTa = new JTextField(benh.getMoTa());
 
-            editDialog.add(new JLabel("Họ tên:"));
-            editDialog.add(tfHoTen);
-            editDialog.add(new JLabel("Email:"));
-            editDialog.add(tfEmail);
-            editDialog.add(new JLabel("Tên đăng nhập:"));
-            editDialog.add(tfTenDangNhap);
-            editDialog.add(new JLabel("Ngày sinh:"));
-            editDialog.add(tfNgaySinh);
-            editDialog.add(new JLabel("Vai trò:"));
-            editDialog.add(cbVaiTro);
+            editDialog.add(new JLabel("Tên bệnh:"));
+            editDialog.add(tfTenBenh);
+            editDialog.add(new JLabel("Mô tả:"));
+            editDialog.add(tfMoTa);
 
             JButton btnSave = new JButton("Lưu");
             JButton btnCancel = new JButton("Hủy");
 
             btnSave.addActionListener(e -> {
-                nd.setHoTen(tfHoTen.getText().trim());
-                nd.setEmail(tfEmail.getText().trim());
-                nd.setTenDangNhap(tfTenDangNhap.getText().trim());
-                nd.setNgaySinh(tfNgaySinh.getText().isEmpty() ? null
-                        : java.sql.Date.valueOf(tfNgaySinh.getText().trim()));
-                nd.setVaiTro(Role.valueOf(cbVaiTro.getSelectedItem().toString()));
+                benh.setTenBenh(tfTenBenh.getText().trim());
+                benh.setMoTa(tfMoTa.getText().trim());
 
-                if (adminController.updateNguoiDung(nd)) {
+                if (benh.getTenBenh().isEmpty()) {
+                    JOptionPane.showMessageDialog(editDialog, "Tên bệnh không được để trống!");
+                    return;
+                }
+
+                if (adminController.updateBenh(benh)) {
                     JOptionPane.showMessageDialog(editDialog, "Cập nhật thành công!");
                     editDialog.dispose();
                     loadData();
@@ -330,6 +392,7 @@ public class NguoiDungPanel extends JPanel {
         @Override
         public Component getTableCellEditorComponent(JTable table, Object value,
                 boolean isSelected, int row, int column) {
+            maBenh = table.getValueAt(row, 0).toString();
             return panel;
         }
 

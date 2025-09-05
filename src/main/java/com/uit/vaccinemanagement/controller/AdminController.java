@@ -13,11 +13,92 @@ public class AdminController {
     private final NguoiDungDAO nguoiDungDAO;
     private final VaccineDAO vaccineDAO;
     private final NhaSanXuatDAO nhaSanXuatDAO;
+    private final BenhDAO benhDAO;
 
     public AdminController() {
         this.nguoiDungDAO = new NguoiDungDAO();
         this.vaccineDAO = new VaccineDAO();
         this.nhaSanXuatDAO = new NhaSanXuatDAO();
+        this.benhDAO = new BenhDAO();
+    }
+
+    // Disease Management Methods
+    public List<Benh> getBenhPage(int page, int pageSize) {
+        if (page <= 0) {
+            page = DEFAULT_PAGE;
+        }
+        if (pageSize <= 0) {
+            pageSize = DEFAULT_PAGE_SIZE;
+        }
+        return benhDAO.getBenhPage(page, pageSize);
+    }
+
+    public List<Benh> getDefaultBenhPage() {
+        return getBenhPage(DEFAULT_PAGE, DEFAULT_PAGE_SIZE);
+    }
+
+    public int getTotalBenh() {
+        return benhDAO.getTotalRecords();
+    }
+
+    public List<Benh> getAllBenh() {
+        return benhDAO.getAllBenh();
+    }
+
+    // Disease search methods
+    public List<Benh> searchBenhByName(int page, int pageSize, String tenBenh) {
+        if (tenBenh == null || tenBenh.trim().isEmpty()) {
+            return getBenhPage(page, pageSize);
+        }
+
+        if (page <= 0) {
+            page = DEFAULT_PAGE;
+        }
+        if (pageSize <= 0) {
+            pageSize = DEFAULT_PAGE_SIZE;
+        }
+
+        return benhDAO.searchByTenBenh(tenBenh.trim(), page, pageSize);
+    }
+
+    public int getTotalBenhSearchResults(String tenBenh) {
+        if (tenBenh == null || tenBenh.trim().isEmpty()) {
+            return getTotalBenh();
+        }
+        return benhDAO.getTotalSearchResults(tenBenh.trim());
+    }
+
+    public boolean addBenh(Benh benh) {
+        if (benh == null) {
+            throw new IllegalArgumentException("Disease cannot be null");
+        }
+        if (benh.getTenBenh() == null || benh.getTenBenh().trim().isEmpty()) {
+            throw new IllegalArgumentException("Disease name is required");
+        }
+        if (benh.getNgayTao() == null) {
+            benh.setNgayTao(new java.sql.Timestamp(System.currentTimeMillis()));
+        }
+        return benhDAO.addBenh(benh);
+    }
+
+    public boolean updateBenh(Benh benh) {
+        if (benh == null) {
+            throw new IllegalArgumentException("Disease cannot be null");
+        }
+        if (benh.getMaBenh() == null || benh.getMaBenh().trim().isEmpty()) {
+            throw new IllegalArgumentException("Disease ID is required");
+        }
+        if (benh.getTenBenh() == null || benh.getTenBenh().trim().isEmpty()) {
+            throw new IllegalArgumentException("Disease name is required");
+        }
+        return benhDAO.updateBenh(benh);
+    }
+
+    public boolean deleteBenh(String maBenh) {
+        if (maBenh == null || maBenh.trim().isEmpty()) {
+            throw new IllegalArgumentException("Disease ID is required");
+        }
+        return benhDAO.deleteBenh(maBenh);
     }
 
     // User Management Methods

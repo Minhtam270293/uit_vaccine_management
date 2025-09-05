@@ -3,10 +3,12 @@ package com.uit.vaccinemanagement.view;
 import com.uit.vaccinemanagement.dao.TiemChungDAO;
 import com.uit.vaccinemanagement.dao.NguoiDungDAO;
 import com.uit.vaccinemanagement.model.NguoiDung;
+import com.uit.vaccinemanagement.controller.BacSiController;
 
 import javax.swing.*;
 import com.uit.vaccinemanagement.view.SharedComponents;
 import com.uit.vaccinemanagement.view.RoundedButton;
+import com.uit.vaccinemanagement.view.panels.TiemChungPanel;
 
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
@@ -22,11 +24,11 @@ import java.util.List;
 public class BacSiView {
 
     private final NguoiDung currentUser;
-    private final TiemChungDAO tiemChungDAO = new TiemChungDAO();
-    private final NguoiDungDAO nguoiDungDAO = new NguoiDungDAO();
+    private final BacSiController bacSiController;
 
     public BacSiView(NguoiDung currentUser) {
         this.currentUser = currentUser;
+        this.bacSiController = new BacSiController();
     }
 
     public void showBacSiUI() {
@@ -50,7 +52,7 @@ public class BacSiView {
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 18, 18);
                 g2.setColor(new Color(200, 200, 200));
                 g2.setStroke(new BasicStroke(1));
-                g2.drawRoundRect(0, 0, getWidth()-1, getHeight()-1, 18, 18);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 18, 18);
                 g2.dispose();
             }
         };
@@ -129,16 +131,9 @@ public class BacSiView {
         leftPanel.add(buttonPanelLogout);
 
         btnChiDinhTiem.addActionListener((ActionEvent e) -> {
-            ChiDinhTiemDialog dialog = new ChiDinhTiemDialog(
-                frame,
-                currentUser,
-                nguoiDungDAO,
-                tiemChungDAO
-            );
+            ChiDinhTiemDialog dialog = new ChiDinhTiemDialog(frame, currentUser, bacSiController);
             dialog.setVisible(true);
         });
-
-
 
         // Right panel (column 2)
         JPanel rightPanel = new JPanel(new BorderLayout());
@@ -197,167 +192,39 @@ public class BacSiView {
         splitPane.setDividerLocation(220);
         frame.getContentPane().add(splitPane);
 
-
-
         // -----------------------------------------------------------------------------------------------------------
         // Danh sách tiêm chủng
         btnTiemChung.addActionListener((ActionEvent e) -> {
             frame.setSize(1150, 500);
-            tableTitle.setText("QUẢN LÝ TIÊM CHỦNG");
-            List<Object[]> data = tiemChungDAO.getByMaBacSi(currentUser.getMaNguoiDung());
+            TiemChungPanel tiemChungPanel = new TiemChungPanel(frame, bacSiController, currentUser);
 
-            // Cột
-            String[] columns = {"Mã TC", "Ngày tiêm", "Mã vắc xin", "Mã bác sĩ", "Mã khách", "Trạng thái", "Ghi chú", "Thao tác"};
-            DefaultTableModel model = new DefaultTableModel(columns, 0);
-
-            // Đổ dữ liệu
-            for (Object[] row : data) {
-                Object[] newRow = new Object[row.length + 1];
-                System.arraycopy(row, 0, newRow, 0, row.length);
-                newRow[row.length] = "Thao tác"; // placeholder
-                model.addRow(newRow);
-            }
-
-            JTable newTable = new JTable(model);
-            newTable.setFillsViewportHeight(true);
-            newTable.setRowHeight(30);
-            newTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-            newTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
-            // Header
-            JTableHeader header = newTable.getTableHeader();
-            header.setFont(new Font("Arial", Font.BOLD, 14));
-            header.setReorderingAllowed(false);
-            header.setResizingAllowed(true);
-
-            // Set width từng cột
-            TableColumnModel columnModel = newTable.getColumnModel();
-            columnModel.getColumn(0).setPreferredWidth(60);   // Mã TC
-            columnModel.getColumn(1).setPreferredWidth(100);  // Ngày tiêm
-            columnModel.getColumn(2).setPreferredWidth(100);  // Mã vaccine
-            columnModel.getColumn(3).setPreferredWidth(100);  // Mã bác sĩ
-            columnModel.getColumn(4).setPreferredWidth(100);  // Mã khách
-            columnModel.getColumn(5).setPreferredWidth(120);  // Trạng thái
-            columnModel.getColumn(6).setPreferredWidth(200);  // Ghi chú
-            columnModel.getColumn(7).setPreferredWidth(120);  // Thao tác
-
-            // Renderer căn giữa cho mấy cột mã
-            DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-            centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
-            newTable.getColumnModel().getColumn(0).setCellRenderer(centerRenderer); // Mã TC
-            newTable.getColumnModel().getColumn(2).setCellRenderer(centerRenderer); // Mã vaccine
-            newTable.getColumnModel().getColumn(3).setCellRenderer(centerRenderer); // Mã bác sĩ
-            newTable.getColumnModel().getColumn(4).setCellRenderer(centerRenderer); // Mã khách
-
-            // ===== Custom renderer + editor cho cột thao tác =====
-            TableColumn actionColumn = newTable.getColumnModel().getColumn(7);
-
-            actionColumn.setCellRenderer(new TableCellRenderer() {
-                @Override
-                public Component getTableCellRendererComponent(JTable table, Object value,
-                                                            boolean isSelected, boolean hasFocus, int row, int column) {
-                    JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
-                    JButton btnEdit = new JButton("✎");
-                    JButton btnDelete = new JButton("🗑");
-
-                    btnEdit.setPreferredSize(new Dimension(50, 25));
-                    btnDelete.setPreferredSize(new Dimension(50, 25));
-
-                    panel.add(btnEdit);
-                    panel.add(btnDelete);
-                    return panel;
-                }
-            });
-
-            actionColumn.setCellEditor(new DefaultCellEditor(new JCheckBox()) {
-                JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
-                JButton btnEdit = new JButton("✎");
-                JButton btnDelete = new JButton("🗑");
-
-                {
-                    btnEdit.setPreferredSize(new Dimension(50, 25));
-                    btnDelete.setPreferredSize(new Dimension(50, 25));
-
-                    panel.add(btnEdit);
-                    panel.add(btnDelete);
-
-                    // Sự kiện Edit
-                    btnEdit.addActionListener(ev -> {
-                        int row = newTable.getSelectedRow();
-                        if (row != -1) {
-                            String maTC = newTable.getValueAt(row, 0).toString();
-                            // TODO: Lấy đối tượng TiemChung từ DAO theo maTC và mở form edit
-                            JOptionPane.showMessageDialog(frame, "Sửa tiêm chủng: " + maTC);
-                        }
-                    });
-
-                    // Sự kiện Delete
-                    btnDelete.addActionListener(ev -> {
-                        int row = newTable.getSelectedRow();
-                        if (row != -1) {
-                            String maTC = newTable.getValueAt(row, 0).toString();
-                            int confirm = JOptionPane.showConfirmDialog(frame, "Xóa tiêm chủng " + maTC + " ?", "Xác nhận", JOptionPane.YES_NO_OPTION);
-                            if (confirm == JOptionPane.YES_OPTION) {
-                                boolean success = tiemChungDAO.deleteTiemChung(maTC);
-                                if (success) {
-                                    JOptionPane.showMessageDialog(frame, "Xóa thành công!");
-                                    btnTiemChung.doClick();
-                                } else {
-                                    JOptionPane.showMessageDialog(frame, "Xóa thất bại!");
-                                }
-                            }
-                        }
-                    });
-
-                }
-
-                @Override
-                public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-                    return panel;
-                }
-
-                @Override
-                public Object getCellEditorValue() {
-                    return "";
-                }
-            });
-
-            
-            // Thay bảng mới vào rightPanel
-            JScrollPane newScrollPane = new JScrollPane(newTable);
+            // Replace content in right panel
             rightPanel.removeAll();
-            rightPanel.add(headerPanel, BorderLayout.NORTH);
-            rightPanel.add(newScrollPane, BorderLayout.CENTER);
+            rightPanel.add(tiemChungPanel, BorderLayout.CENTER);
             rightPanel.revalidate();
             rightPanel.repaint();
-            rightPanel.add(paginationPanel, BorderLayout.SOUTH);
         });
-
 
         // Danh sách khách hàng
         btnKhachHang.addActionListener((ActionEvent e) -> {
             frame.setSize(1250, 500);
             tableTitle.setText("QUẢN LÝ KHÁCH HÀNG");
-            List<NguoiDung> khachList = nguoiDungDAO.getAllNguoiDung();
+            List<NguoiDung> khachList = bacSiController.getDefaultKhachHangPage();
 
-            String[] columns = {"Mã KH", "Họ Tên", "Tên đăng nhập", "Email", "Vai trò", "Ngày tạo", "Ngày sinh", "Giới tính", "Thao tác"};
+            String[] columns = {"Mã KH", "Họ Tên", "Tên đăng nhập", "Email", "Vai trò", "Ngày tạo", "Ngày sinh", "Giới tính"};
             DefaultTableModel model = new DefaultTableModel(columns, 0);
 
-            // Chỉ lấy những người có vai trò = KHÁCH
             for (NguoiDung nd : khachList) {
-                if (nd.getVaiTro().name().equalsIgnoreCase("khach")) {
-                    model.addRow(new Object[]{
-                        nd.getMaNguoiDung(),
-                        nd.getHoTen(),
-                        nd.getTenDangNhap(),
-                        nd.getEmail(),
-                        nd.getVaiTro(),
-                        nd.getNgayTao(),
-                        nd.getNgaySinh(),
-                        nd.getGioiTinh(),
-                        "Thao tác" // placeholder
-                    });
-                }
+                model.addRow(new Object[]{
+                    nd.getMaNguoiDung(),
+                    nd.getHoTen(),
+                    nd.getTenDangNhap(),
+                    nd.getEmail(),
+                    nd.getVaiTro(),
+                    nd.getNgayTao(),
+                    nd.getNgaySinh(),
+                    nd.getGioiTinh()
+                });
             }
 
             JTable newTable = new JTable(model);
@@ -382,7 +249,6 @@ public class BacSiView {
             columnModel.getColumn(5).setPreferredWidth(100);  // Ngày tạo
             columnModel.getColumn(6).setPreferredWidth(100);  // Ngày sinh
             columnModel.getColumn(7).setPreferredWidth(80);   // Giới tính
-            columnModel.getColumn(8).setPreferredWidth(120);  // Thao tác
 
             // Renderer căn giữa cho mấy cột mã + vai trò + ngày sinh + giới tính
             DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
@@ -391,84 +257,6 @@ public class BacSiView {
             newTable.getColumnModel().getColumn(4).setCellRenderer(centerRenderer); // Vai trò
             newTable.getColumnModel().getColumn(6).setCellRenderer(centerRenderer); // Ngày sinh
             newTable.getColumnModel().getColumn(7).setCellRenderer(centerRenderer); // Giới tính
-
-            // ===== Custom renderer + editor cho cột thao tác =====
-            TableColumn actionColumn = newTable.getColumnModel().getColumn(8);
-
-            actionColumn.setCellRenderer(new TableCellRenderer() {
-                @Override
-                public Component getTableCellRendererComponent(JTable table, Object value,
-                                                            boolean isSelected, boolean hasFocus, int row, int column) {
-                    JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
-                    JButton btnEdit = new JButton("✎");
-                    JButton btnDelete = new JButton("🗑");
-
-                    btnEdit.setPreferredSize(new Dimension(50, 25));
-                    btnDelete.setPreferredSize(new Dimension(50, 25));
-
-                    panel.add(btnEdit);
-                    panel.add(btnDelete);
-                    return panel;
-                }
-            });
-
-            actionColumn.setCellEditor(new DefaultCellEditor(new JCheckBox()) {
-                JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
-                JButton btnEdit = new JButton("✎");
-                JButton btnDelete = new JButton("🗑");
-
-                {
-                    btnEdit.setPreferredSize(new Dimension(50, 25));
-                    btnDelete.setPreferredSize(new Dimension(50, 25));
-
-                    panel.add(btnEdit);
-                    panel.add(btnDelete);
-
-                    // Sự kiện Edit
-                    btnEdit.addActionListener(ev -> {
-                        int row = newTable.getSelectedRow();
-                        if (row != -1) {
-                            String maKH = newTable.getValueAt(row, 0).toString();
-                            NguoiDung khach = nguoiDungDAO.getAllNguoiDung().stream()
-                                    .filter(u -> u.getMaNguoiDung().equals(maKH))
-                                    .findFirst().orElse(null);
-
-                            if (khach != null) {
-                                // TODO: mở dialog edit khách hàng (giống edit người dùng)
-                                JOptionPane.showMessageDialog(frame, "Sửa khách hàng: " + maKH);
-                            }
-                        }
-                    });
-
-                    // Sự kiện Delete
-                    btnDelete.addActionListener(ev -> {
-                        int row = newTable.getSelectedRow();
-                        if (row != -1) {
-                            String maKH = newTable.getValueAt(row, 0).toString();
-                            int confirm = JOptionPane.showConfirmDialog(frame, "Xóa khách hàng " + maKH + " ?", "Xác nhận", JOptionPane.YES_NO_OPTION);
-                            if (confirm == JOptionPane.YES_OPTION) {
-                                boolean success = nguoiDungDAO.deleteNguoiDung(maKH);
-                                if (success) {
-                                    JOptionPane.showMessageDialog(frame, "Xóa thành công!");
-                                    btnKhachHang.doClick();
-                                } else {
-                                    JOptionPane.showMessageDialog(frame, "Xóa thất bại!");
-                                }
-                            }
-                        }
-                    });
-                }
-
-                @Override
-                public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-                    return panel;
-                }
-
-                @Override
-                public Object getCellEditorValue() {
-                    return "";
-                }
-            });
 
             JScrollPane newScrollPane = new JScrollPane(newTable);
 
@@ -484,5 +272,3 @@ public class BacSiView {
         frame.setVisible(true);
     }
 }
-
-

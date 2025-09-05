@@ -5,7 +5,6 @@ import java.util.*;
 
 public class KhachController {
 
-    private List<ThongTinMua> lichSuMua = new ArrayList<>();
     private List<TiemChung> lichTiem = new ArrayList<>();
 
     public void dangKy(NguoiDung nguoiDung) {
@@ -16,11 +15,6 @@ public class KhachController {
         System.out.println("Đăng nhập thành công cho: " + tenDangNhap);
     }
 
-    public void muaVaccine(ThongTinMua mua) {
-        lichSuMua.add(mua);
-        System.out.println("Mua vaccine thành công, mã giao dịch: " + mua.getMaGiaoDich());
-    }
-
     public void xemLichTiem() {
         System.out.println("--- Lịch tiêm ---");
         for (TiemChung t : lichTiem) {
@@ -28,10 +22,4 @@ public class KhachController {
         }
     }
 
-    public void xemLichSuMua() {
-        System.out.println("--- Lịch sử mua ---");
-        for (ThongTinMua m : lichSuMua) {
-            System.out.println(m.getMaGiaoDich());
-        }
-    }
 }

@@ -2,7 +2,6 @@ package com.uit.vaccinemanagement.view;
 
 import com.uit.vaccinemanagement.model.NguoiDung;
 import com.uit.vaccinemanagement.dao.TiemChungDAO;
-import com.uit.vaccinemanagement.dao.ThongTinMuaDAO;
 
 import javax.swing.*;
 import com.uit.vaccinemanagement.view.SharedComponents;
@@ -18,7 +17,6 @@ public class KhachView {
 
     private final NguoiDung currentUser;
     private final TiemChungDAO tiemChungDAO = new TiemChungDAO();
-    private final ThongTinMuaDAO thongTinMuaDAO = new ThongTinMuaDAO();
 
     public KhachView(NguoiDung currentUser) {
         this.currentUser = currentUser;
@@ -45,7 +43,7 @@ public class KhachView {
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 18, 18);
                 g2.setColor(new Color(200, 200, 200));
                 g2.setStroke(new BasicStroke(1));
-                g2.drawRoundRect(0, 0, getWidth()-1, getHeight()-1, 18, 18);
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 18, 18);
                 g2.dispose();
             }
         };
@@ -77,11 +75,8 @@ public class KhachView {
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 10));
         Dimension buttonSize = new Dimension(180, 35);
         RoundedButton btnLichTiem = new RoundedButton("Xem lịch sử tiêm");
-        RoundedButton btnLichSuMua = new RoundedButton("Xem lịch sử mua");
         btnLichTiem.setPreferredSize(buttonSize);
-        btnLichSuMua.setPreferredSize(buttonSize);
         buttonPanel.add(btnLichTiem);
-        buttonPanel.add(btnLichSuMua);
         leftPanel.add(buttonPanel);
 
         // khoảng cách với logout
@@ -151,16 +146,15 @@ public class KhachView {
 
         frame.setVisible(true);
 
-
-    // Event handling
-    // Logout button event is now handled by SharedComponents
+        // Event handling
+        // Logout button event is now handled by SharedComponents
         // ====== Xử lý button ở panel trái ======
         btnLichTiem.addActionListener((ActionEvent e) -> {
             tableTitle.setText("LỊCH SỬ TIÊM CHỦNG");
 
             // Lấy dữ liệu từ DAO
             List<Object[]> data = tiemChungDAO.getByMaKhach(currentUser.getMaNguoiDung());
-            String[] columns = {"Mã tiêm chủng", "Ngày tiêm", "Mã vắc xin", "Mã bác sĩ", "Trạng thái tiêm", "Ghi chú"};
+            String[] columns = {"Mã tiêm chủng", "Ngày tiêm", "Tên vắc xin", "Bác sĩ phụ trách", "Trạng thái tiêm", "Ghi chú"};
 
             // Tạo model mới
             DefaultTableModel model = new DefaultTableModel(columns, 0);
@@ -176,36 +170,6 @@ public class KhachView {
             table.getColumnModel().getColumn(2).setCellRenderer(centerRenderer);
             table.getColumnModel().getColumn(3).setCellRenderer(centerRenderer);
         });
-
-
-    // lịch sử mua
-        btnLichSuMua.addActionListener((ActionEvent e) -> {
-            tableTitle.setText("LỊCH SỬ MUA HÀNG");
-
-            // Lấy dữ liệu từ DAO
-            List<Object[]> data = thongTinMuaDAO.getByMaKhach(currentUser.getMaNguoiDung());
-            String[] columns = {"Mã giao dịch", "Mã vắc xin", "Mã khách", "Số lượng mua", "Tổng tiền", "Ngày giao dịch"};
-
-            // Tạo model mới
-            DefaultTableModel model = new DefaultTableModel(columns, 0);
-            for (Object[] row : data) {
-                model.addRow(row);
-            }
-            table.setModel(model);
-
-            // ===== Căn giữa các cột số =====
-            DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-            centerRenderer.setHorizontalAlignment(JLabel.CENTER);
-
-            // Giả sử các cột 0,1,2,3,4 là số → căn giữa
-            table.getColumnModel().getColumn(0).setCellRenderer(centerRenderer); // Mã giao dịch
-            table.getColumnModel().getColumn(1).setCellRenderer(centerRenderer); // Mã vaccine
-            table.getColumnModel().getColumn(2).setCellRenderer(centerRenderer); // Mã khách
-            table.getColumnModel().getColumn(3).setCellRenderer(centerRenderer); // Số lượng mua
-            table.getColumnModel().getColumn(4).setCellRenderer(centerRenderer); // Tổng tiền
-            // Cột 5 (Ngày giao dịch) để trái cho dễ đọc
-        });
-
 
         frame.setVisible(true);
     }

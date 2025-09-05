@@ -1,16 +1,20 @@
 package com.uit.vaccinemanagement.view;
 
-import com.uit.vaccinemanagement.dao.TiemChungDAO;
-import com.uit.vaccinemanagement.dao.NguoiDungDAO;
-import com.uit.vaccinemanagement.dao.VaccineDAO;
+import com.uit.vaccinemanagement.controller.BacSiController;
 import com.uit.vaccinemanagement.model.NguoiDung;
+import com.uit.vaccinemanagement.model.TiemChung;
+import com.uit.vaccinemanagement.model.Vaccine;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.List;
 
 public class ChiDinhTiemDialog extends JDialog {
-    public ChiDinhTiemDialog(JFrame parent, NguoiDung currentUser, NguoiDungDAO nguoiDungDAO, TiemChungDAO tiemChungDAO) {
+    private final BacSiController bacSiController;
+    
+    public ChiDinhTiemDialog(JFrame parent, NguoiDung currentUser, BacSiController bacSiController) {
         super(parent, "Tạo chỉ định tiêm", true);
+        this.bacSiController = bacSiController;
         setSize(500, 400);
 
         JPanel mainPanel = new JPanel(new BorderLayout());
@@ -45,20 +49,24 @@ public class ChiDinhTiemDialog extends JDialog {
         JComboBox<String> cbKhach = new JComboBox<>();
         cbKhach.setFont(uiFont);
         cbKhach.setPreferredSize(textFieldSize);
-        for (com.uit.vaccinemanagement.model.NguoiDung nd : nguoiDungDAO.getAllNguoiDung()) {
-            if (nd.getVaiTro().name().equalsIgnoreCase("khach")) {
-                cbKhach.addItem(nd.getMaNguoiDung() + " - " + nd.getHoTen());
-            }
+        List<NguoiDung> khachList = bacSiController.getAllCustomers();
+        DefaultComboBoxModel<String> khachModel = new DefaultComboBoxModel<>();
+        for (NguoiDung khach : khachList) {
+            khachModel.addElement(khach.getMaNguoiDung() + " - " + khach.getHoTen());
         }
+        cbKhach.setModel(khachModel);
 
         JLabel lblVaccine = new JLabel("Vắc xin:");
         lblVaccine.setFont(uiFont);
         JComboBox<String> cbVaccine = new JComboBox<>();
         cbVaccine.setFont(uiFont);
         cbVaccine.setPreferredSize(textFieldSize);
-        VaccineDAO vaccineDAO = new VaccineDAO();
-        for (Object[] v : vaccineDAO.getAllVaccineAsObjectArray()) {
-            cbVaccine.addItem(v[0] + " - " + v[1]);
+        List<Object[]> vaccines = bacSiController.getAvailableVaccines();
+        
+        for (Object[] v : vaccines) {
+            String maVaccine = (String) v[0];
+            String tenVaccine = (String) v[1];
+            cbVaccine.addItem(maVaccine + " - " + tenVaccine);
         }
 
         JLabel lblNgayTiem = new JLabel("Ngày tiêm (yyyy-mm-dd):");
@@ -148,7 +156,7 @@ public class ChiDinhTiemDialog extends JDialog {
 
                 java.sql.Date ngayChiDinh = new java.sql.Date(System.currentTimeMillis());
 
-                com.uit.vaccinemanagement.model.TiemChung tc = new com.uit.vaccinemanagement.model.TiemChung(
+                TiemChung tc = new TiemChung(
                     null,
                     maVaccine,
                     currentUser.getMaNguoiDung(),
@@ -158,12 +166,16 @@ public class ChiDinhTiemDialog extends JDialog {
                     "cho_tiem",
                     ghiChu
                 );
-                boolean success = tiemChungDAO.addTiemChung(tc);
-                if (success) {
-                    JOptionPane.showMessageDialog(this, "Tạo chỉ định tiêm thành công!");
-                    dispose();
-                } else {
-                    JOptionPane.showMessageDialog(this, "Tạo chỉ định tiêm thất bại!");
+                try {
+                    boolean success = bacSiController.createChiDinhTiem(tc);
+                    if (success) {
+                        JOptionPane.showMessageDialog(this, "Tạo chỉ định tiêm thành công!");
+                        dispose();
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Tạo chỉ định tiêm thất bại!");
+                    }
+                } catch (IllegalArgumentException ex) {
+                    JOptionPane.showMessageDialog(this, "Lỗi: " + ex.getMessage());
                 }
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, "Lỗi nhập liệu hoặc hệ thống!");

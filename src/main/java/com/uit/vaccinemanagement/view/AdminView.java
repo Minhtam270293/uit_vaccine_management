@@ -50,6 +50,7 @@ public class AdminView {
     private static final String NGUOIDUNG_PANEL = "NGUOIDUNG_PANEL";
     private static final String VACCINE_PANEL = "VACCINE_PANEL";
     private static final String NHASX_PANEL = "NHASX_PANEL";
+    private static final String BENH_PANEL = "BENH_PANEL";
 
     private final NguoiDung currentUser;
     private final AdminController adminController;
@@ -118,19 +119,24 @@ public class AdminView {
         // Đảm bảo bạn dùng RoundedButton cho 3 nút sidebar như sau:
         RoundedButton btnNguoiDung = new RoundedButton("Người dùng");
         RoundedButton btnVaccine = new RoundedButton("Vắc xin");
+        RoundedButton btnBenh = new RoundedButton("Bệnh");
         RoundedButton btnNhaSanXuat = new RoundedButton("Nhà sản xuất");
         // Đặt kích thước đồng đều cho các nút
         Dimension buttonSize = new Dimension(200, 40);
         btnNguoiDung.setPreferredSize(buttonSize);
         btnVaccine.setPreferredSize(buttonSize);
+        btnBenh.setPreferredSize(buttonSize);
         btnNhaSanXuat.setPreferredSize(buttonSize);
 
         // Thêm các nút vào buttonPanel
         buttonPanel.add(btnNguoiDung);
         buttonPanel.add(btnVaccine);
+        buttonPanel.add(btnBenh);
         buttonPanel.add(btnNhaSanXuat);
+        
         btnNguoiDung.addActionListener(e -> cardLayout.show(cardPanel, NGUOIDUNG_PANEL));
         btnVaccine.addActionListener(e -> cardLayout.show(cardPanel, VACCINE_PANEL));
+        btnBenh.addActionListener(e -> cardLayout.show(cardPanel, BENH_PANEL));
         btnNhaSanXuat.addActionListener(e -> cardLayout.show(cardPanel, NHASX_PANEL));
 
         btnNguoiDung.addActionListener(e -> {
@@ -141,6 +147,11 @@ public class AdminView {
         btnVaccine.addActionListener(e -> {
             cardLayout.show(cardPanel, VACCINE_PANEL);
             frame.setSize(1525, 800);
+        });
+
+        btnBenh.addActionListener(e -> {
+            cardLayout.show(cardPanel, BENH_PANEL);
+            frame.setSize(968, 800);
         });
 
         btnNhaSanXuat.addActionListener(e -> {
@@ -178,6 +189,7 @@ public class AdminView {
         cardPanel.add(new NguoiDungPanel(frame, adminController), NGUOIDUNG_PANEL);
         cardPanel.add(new VaccinePanel(frame, adminController), VACCINE_PANEL);
         cardPanel.add(new NhaSanXuatPanel(frame, adminController), NHASX_PANEL);
+        cardPanel.add(new BenhPanel(frame, adminController), BENH_PANEL);
 
         // Create split pane and add panels
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);

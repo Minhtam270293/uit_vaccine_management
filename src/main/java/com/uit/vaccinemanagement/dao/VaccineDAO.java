@@ -41,6 +41,45 @@ public class VaccineDAO {
         return list;
     }
 
+    public boolean decreaseQuantity(String maVaccine) {
+        String sql = "UPDATE `Vaccine` SET `sl_con_lai` = `sl_con_lai` - 1 WHERE `ma_vaccine` = ? AND `sl_con_lai` > 0";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, maVaccine);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public List<Object[]> getAvailableVaccines() {
+        List<Object[]> result = new ArrayList<>();
+        String sql = """
+            SELECT 
+                v.`ma_vaccine`, 
+                v.`ten_vaccine`
+            FROM `Vaccine` v
+            WHERE v.`sl_con_lai` > 0 
+            AND v.`ngay_het_han` > CURRENT_DATE()
+            ORDER BY v.`ngay_het_han` ASC
+            """;
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                Object[] row = {
+                    rs.getString("ma_vaccine"),
+                    rs.getString("ten_vaccine")
+                };
+                result.add(row);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
     public int getVaccineCount() {
         String sql = "SELECT COUNT(*) FROM Vaccine";
         try (Connection conn = DBConnection.getConnection();
