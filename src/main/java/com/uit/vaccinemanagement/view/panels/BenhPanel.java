@@ -2,6 +2,8 @@ package com.uit.vaccinemanagement.view.panels;
 
 import com.uit.vaccinemanagement.controller.AdminController;
 import com.uit.vaccinemanagement.model.Benh;
+import com.uit.vaccinemanagement.view.dialogs.BenhEditDialog;
+import com.uit.vaccinemanagement.view.dialogs.BenhAddDialog;
 import javax.swing.*;
 import javax.swing.table.*;
 import java.awt.*;
@@ -225,51 +227,7 @@ public class BenhPanel extends JPanel {
     }
 
     private void showAddDialog() {
-        JDialog dialog = new JDialog(parentFrame, "Thêm bệnh mới", true);
-        dialog.setLayout(new GridLayout(0, 2, 5, 5));
-        dialog.setSize(400, 200);
-
-        JTextField tfMaBenh = new JTextField();
-        JTextField tfTenBenh = new JTextField();
-        JTextField tfMoTa = new JTextField();
-
-        dialog.add(new JLabel("Mã bệnh:"));
-        dialog.add(tfMaBenh);
-        dialog.add(new JLabel("Tên bệnh:"));
-        dialog.add(tfTenBenh);
-        dialog.add(new JLabel("Mô tả:"));
-        dialog.add(tfMoTa);
-
-        JButton btnSave = new JButton("Lưu");
-        JButton btnCancel = new JButton("Hủy");
-
-        btnSave.addActionListener(e -> {
-            String maBenh = tfMaBenh.getText().trim();
-            String tenBenh = tfTenBenh.getText().trim();
-            String moTa = tfMoTa.getText().trim();
-
-            if (maBenh.isEmpty() || tenBenh.isEmpty()) {
-                JOptionPane.showMessageDialog(dialog, "Vui lòng nhập đầy đủ thông tin!");
-                return;
-            }
-
-            Benh benh = new Benh(maBenh, tenBenh, moTa, new java.sql.Timestamp(System.currentTimeMillis()));
-
-            if (adminController.addBenh(benh)) {
-                JOptionPane.showMessageDialog(dialog, "Thêm bệnh thành công!");
-                dialog.dispose();
-                loadData();
-            } else {
-                JOptionPane.showMessageDialog(dialog, "Thêm bệnh thất bại!");
-            }
-        });
-
-        btnCancel.addActionListener(e -> dialog.dispose());
-
-        dialog.add(btnSave);
-        dialog.add(btnCancel);
-
-        dialog.setLocationRelativeTo(parentFrame);
+        BenhAddDialog dialog = new BenhAddDialog(parentFrame, adminController, () -> loadData());
         dialog.setVisible(true);
     }
 
@@ -346,46 +304,8 @@ public class BenhPanel extends JPanel {
         }
 
         private void showEditDialog(Benh benh) {
-            if (benh == null) return;
-
-            JDialog editDialog = new JDialog(parentFrame, "Sửa thông tin bệnh", true);
-            editDialog.setLayout(new GridLayout(0, 2, 5, 5));
-            editDialog.setSize(400, 200);
-
-            JTextField tfTenBenh = new JTextField(benh.getTenBenh());
-            JTextField tfMoTa = new JTextField(benh.getMoTa());
-
-            editDialog.add(new JLabel("Tên bệnh:"));
-            editDialog.add(tfTenBenh);
-            editDialog.add(new JLabel("Mô tả:"));
-            editDialog.add(tfMoTa);
-
-            JButton btnSave = new JButton("Lưu");
-            JButton btnCancel = new JButton("Hủy");
-
-            btnSave.addActionListener(e -> {
-                benh.setTenBenh(tfTenBenh.getText().trim());
-                benh.setMoTa(tfMoTa.getText().trim());
-
-                if (benh.getTenBenh().isEmpty()) {
-                    JOptionPane.showMessageDialog(editDialog, "Tên bệnh không được để trống!");
-                    return;
-                }
-
-                if (adminController.updateBenh(benh)) {
-                    JOptionPane.showMessageDialog(editDialog, "Cập nhật thành công!");
-                    editDialog.dispose();
-                    loadData();
-                } else {
-                    JOptionPane.showMessageDialog(editDialog, "Cập nhật thất bại!");
-                }
-            });
-
-            btnCancel.addActionListener(e -> editDialog.dispose());
-
-            editDialog.add(btnSave);
-            editDialog.add(btnCancel);
-            editDialog.setLocationRelativeTo(parentFrame);
+            BenhEditDialog editDialog =
+                new BenhEditDialog(parentFrame, benh, adminController, () -> loadData());
             editDialog.setVisible(true);
         }
 

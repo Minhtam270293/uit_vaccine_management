@@ -2,8 +2,8 @@ package com.uit.vaccinemanagement.view.panels;
 
 import com.uit.vaccinemanagement.controller.AdminController;
 import com.uit.vaccinemanagement.model.Vaccine;
-import com.uit.vaccinemanagement.view.VaccineAddDialog;
-import com.uit.vaccinemanagement.view.VaccineEditDialog;
+import com.uit.vaccinemanagement.view.dialogs.VaccineAddDialog;
+import com.uit.vaccinemanagement.view.dialogs.VaccineEditDialog;
 
 import javax.swing.*;
 import javax.swing.table.*;

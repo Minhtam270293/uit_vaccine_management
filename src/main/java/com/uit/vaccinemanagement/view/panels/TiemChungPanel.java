@@ -2,7 +2,7 @@ package com.uit.vaccinemanagement.view.panels;
 
 import com.uit.vaccinemanagement.controller.BacSiController;
 import com.uit.vaccinemanagement.model.NguoiDung;
-import com.uit.vaccinemanagement.view.TiemChungEditDialog;
+import com.uit.vaccinemanagement.view.dialogs.TiemChungEditDialog;
 
 import javax.swing.*;
 import javax.swing.table.*;

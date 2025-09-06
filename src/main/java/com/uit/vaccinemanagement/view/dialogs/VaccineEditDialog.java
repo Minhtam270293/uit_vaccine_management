@@ -1,4 +1,4 @@
-package com.uit.vaccinemanagement.view;
+package com.uit.vaccinemanagement.view.dialogs;
 
 import com.uit.vaccinemanagement.controller.AdminController;
 import com.uit.vaccinemanagement.model.Vaccine;
@@ -9,15 +9,16 @@ import java.util.List;
 
 import javax.swing.*;
 import java.awt.*;
+import com.uit.vaccinemanagement.view.AuthButton; // Thêm dòng này
 
 public class VaccineEditDialog extends JDialog {
 
     public VaccineEditDialog(JFrame parent, Vaccine vc, AdminController controller, JButton btnRefresh) {
         super(parent, "Sửa vắc xin", true);
-        setSize(600, 800);
-        setMinimumSize(new Dimension(600, 800));
-        setMaximumSize(new Dimension(600, 800));
-        setPreferredSize(new Dimension(600, 800));
+        setSize(600, 850);
+        setMinimumSize(new Dimension(600, 850));
+        setMaximumSize(new Dimension(600, 850));
+        setPreferredSize(new Dimension(600, 850));
 
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
@@ -161,7 +162,6 @@ public class VaccineEditDialog extends JDialog {
         cbBenh.setPreferredSize(textFieldSize);
         cbBenh.setMinimumSize(textFieldSize);
         cbBenh.setMaximumSize(textFieldSize);
-        cbBenh.setBorder(roundedBorder);
 
         // Populate diseases
         List<Benh> benhList = controller.getAllBenh();
@@ -192,7 +192,6 @@ public class VaccineEditDialog extends JDialog {
                 cbNhaSX.setSelectedItem(item);
             }
         }
-        cbNhaSX.setBorder(roundedBorder);
 
         JLabel lblNgayTao = new JLabel("Ngày tạo:");
         lblNgayTao.setFont(labelFont);
@@ -303,17 +302,16 @@ public class VaccineEditDialog extends JDialog {
         btnSave.setPreferredSize(buttonSize);
         btnCancel.setPreferredSize(buttonSize);
 
-        // Sửa lỗi mất phần dưới: setMaximumSize cho buttonPanel và thêm Box.createVerticalGlue()
-        buttonPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, buttonSize.height + 16));
         buttonPanel.add(btnSave);
         buttonPanel.add(btnCancel);
 
-        mainPanel.add(fieldsPanel);
-        mainPanel.add(Box.createVerticalStrut(18));
-        mainPanel.add(buttonPanel);
-        mainPanel.add(Box.createVerticalGlue()); // Đẩy nút lên, tránh bị cắt dưới
-
-        setContentPane(mainPanel);
+        // Add button panel
+        gbc.gridx = 0;
+        gbc.gridy = row;
+        gbc.gridwidth = 2;
+        fieldsPanel.add(Box.createVerticalStrut(12), gbc);
+        gbc.gridy = ++row;
+        fieldsPanel.add(buttonPanel, gbc);
 
         btnSave.addActionListener(saveEv -> {
             try {
@@ -335,21 +333,24 @@ public class VaccineEditDialog extends JDialog {
                 String selectedNSX = cbNhaSX.getSelectedItem().toString();
                 String maNhaSX = selectedNSX.split(" - ")[0];
                 vc.setMaNhaSX(maNhaSX);
-                vc.setNgayTao(tfNgayTao.getText().isEmpty() ? null : java.sql.Timestamp.valueOf(tfNgayTao.getText().trim()));
+                
+                vc.setNgayTao(new java.sql.Timestamp(System.currentTimeMillis()));
+
+                if (controller.updateVaccine(vc)) {
+                    JOptionPane.showMessageDialog(this, "Cập nhật thành công!");
+                    dispose();
+                    btnRefresh.doClick();
+                } else {
+                    JOptionPane.showMessageDialog(this, "Cập nhật thất bại!");
+                }
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, "Lỗi dữ liệu: " + ex.getMessage());
                 return;
             }
-            boolean success = controller.updateVaccine(vc);
-            if (success) {
-                JOptionPane.showMessageDialog(this, "Cập nhật thành công!");
-                dispose();
-                btnRefresh.doClick();
-            } else {
-                JOptionPane.showMessageDialog(this, "Cập nhật thất bại!");
-            }
         });
         btnCancel.addActionListener(saveEv -> dispose());
+        mainPanel.add(fieldsPanel);
+        setContentPane(mainPanel); // Thêm dòng này để hiển thị nội dung
         setLocationRelativeTo(parent);
     }
 

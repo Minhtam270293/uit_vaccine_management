@@ -2,7 +2,8 @@ package com.uit.vaccinemanagement.view.panels;
 
 import com.uit.vaccinemanagement.controller.AdminController;
 import com.uit.vaccinemanagement.model.NhaSanXuat;
-import com.uit.vaccinemanagement.view.NhaSanXuatAddDialog;
+import com.uit.vaccinemanagement.view.dialogs.NhaSanXuatAddDialog;
+import com.uit.vaccinemanagement.view.dialogs.NhaSanXuatEditDialog;
 
 import javax.swing.*;
 import javax.swing.table.*;
@@ -323,51 +324,10 @@ public class NhaSanXuatPanel extends JPanel {
         }
 
         private void showEditDialog(NhaSanXuat nsx) {
-            JDialog editDialog = new JDialog(parentFrame, "Sửa nhà sản xuất", true);
-            editDialog.setSize(400, 300);
-            editDialog.setLayout(new GridLayout(0, 2, 5, 5));
-
-            JTextField tfMaNhaSX = new JTextField(nsx.getMaNhaSX());
-            JTextField tfTenNhaSX = new JTextField(nsx.getTenNhaSX());
-            JTextField tfQuocGia = new JTextField(nsx.getQuocGia());
-            JTextField tfNgayTao = new JTextField(nsx.getNgayTao() != null ? nsx.getNgayTao().toString() : "");
-
-            editDialog.add(new JLabel("Mã NSX:"));
-            editDialog.add(tfMaNhaSX);
-            editDialog.add(new JLabel("Tên nhà sản xuất:"));
-            editDialog.add(tfTenNhaSX);
-            editDialog.add(new JLabel("Quốc gia:"));
-            editDialog.add(tfQuocGia);
-            editDialog.add(new JLabel("Ngày tạo (yyyy-mm-dd hh:mm:ss):"));
-            editDialog.add(tfNgayTao);
-
-            JButton btnSave = new JButton("Lưu");
-            JButton btnCancel = new JButton("Hủy");
-
-            btnSave.addActionListener(e -> {
-                try {
-                    nsx.setTenNhaSX(tfTenNhaSX.getText().trim());
-                    nsx.setQuocGia(tfQuocGia.getText().trim());
-                    nsx.setNgayTao(tfNgayTao.getText().isEmpty() ? null
-                            : java.sql.Timestamp.valueOf(tfNgayTao.getText().trim()));
-
-                    if (adminController.updateNhaSanXuat(nsx)) {
-                        JOptionPane.showMessageDialog(editDialog, "Cập nhật thành công!");
-                        editDialog.dispose();
-                        loadData();
-                    } else {
-                        JOptionPane.showMessageDialog(editDialog, "Cập nhật thất bại!");
-                    }
-                } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(editDialog, "Lỗi dữ liệu: " + ex.getMessage());
-                }
-            });
-
-            btnCancel.addActionListener(e -> editDialog.dispose());
-
-            editDialog.add(btnSave);
-            editDialog.add(btnCancel);
-            editDialog.setLocationRelativeTo(parentFrame);
+            JButton refreshButton = new JButton();
+            refreshButton.addActionListener(e -> loadData());
+            NhaSanXuatEditDialog editDialog =
+                new NhaSanXuatEditDialog(parentFrame, nsx, adminController, refreshButton);
             editDialog.setVisible(true);
         }
 
@@ -383,3 +343,4 @@ public class NhaSanXuatPanel extends JPanel {
         }
     }
 }
+

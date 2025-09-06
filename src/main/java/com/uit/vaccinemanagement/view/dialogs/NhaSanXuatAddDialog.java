@@ -1,7 +1,8 @@
-package com.uit.vaccinemanagement.view;
+package com.uit.vaccinemanagement.view.dialogs;
 
 import com.uit.vaccinemanagement.controller.AdminController;
 import com.uit.vaccinemanagement.model.NhaSanXuat;
+import com.uit.vaccinemanagement.view.AuthButton;
 
 import javax.swing.*;
 import java.awt.*;

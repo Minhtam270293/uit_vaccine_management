@@ -3,7 +3,8 @@ package com.uit.vaccinemanagement.view.panels;
 import com.uit.vaccinemanagement.controller.AdminController;
 import com.uit.vaccinemanagement.model.NguoiDung;
 import com.uit.vaccinemanagement.util.Role;
-import com.uit.vaccinemanagement.view.NguoiDungAddDialog;
+import com.uit.vaccinemanagement.view.dialogs.NguoiDungAddDialog;
+import com.uit.vaccinemanagement.view.dialogs.NguoiDungEditDialog;
 
 import javax.swing.*;
 import javax.swing.table.*;
@@ -299,53 +300,10 @@ public class NguoiDungPanel extends JPanel {
         }
 
         private void showEditDialog(NguoiDung nd) {
-            JDialog editDialog = new JDialog(parentFrame, "Sửa người dùng", true);
-            editDialog.setSize(400, 300);
-            editDialog.setLayout(new GridLayout(0, 2, 5, 5));
-
-            JTextField tfHoTen = new JTextField(nd.getHoTen());
-            JTextField tfEmail = new JTextField(nd.getEmail());
-            JTextField tfTenDangNhap = new JTextField(nd.getTenDangNhap());
-            JTextField tfNgaySinh = new JTextField(nd.getNgaySinh() != null ? nd.getNgaySinh().toString() : "");
-            JComboBox<String> cbVaiTro = new JComboBox<>(new String[]{"ADMIN", "BACSI", "KHACH"});
-            cbVaiTro.setSelectedItem(nd.getVaiTro().name());
-
-            editDialog.add(new JLabel("Họ tên:"));
-            editDialog.add(tfHoTen);
-            editDialog.add(new JLabel("Email:"));
-            editDialog.add(tfEmail);
-            editDialog.add(new JLabel("Tên đăng nhập:"));
-            editDialog.add(tfTenDangNhap);
-            editDialog.add(new JLabel("Ngày sinh:"));
-            editDialog.add(tfNgaySinh);
-            editDialog.add(new JLabel("Vai trò:"));
-            editDialog.add(cbVaiTro);
-
-            JButton btnSave = new JButton("Lưu");
-            JButton btnCancel = new JButton("Hủy");
-
-            btnSave.addActionListener(e -> {
-                nd.setHoTen(tfHoTen.getText().trim());
-                nd.setEmail(tfEmail.getText().trim());
-                nd.setTenDangNhap(tfTenDangNhap.getText().trim());
-                nd.setNgaySinh(tfNgaySinh.getText().isEmpty() ? null
-                        : java.sql.Date.valueOf(tfNgaySinh.getText().trim()));
-                nd.setVaiTro(Role.valueOf(cbVaiTro.getSelectedItem().toString()));
-
-                if (adminController.updateNguoiDung(nd)) {
-                    JOptionPane.showMessageDialog(editDialog, "Cập nhật thành công!");
-                    editDialog.dispose();
-                    loadData();
-                } else {
-                    JOptionPane.showMessageDialog(editDialog, "Cập nhật thất bại!");
-                }
-            });
-
-            btnCancel.addActionListener(e -> editDialog.dispose());
-
-            editDialog.add(btnSave);
-            editDialog.add(btnCancel);
-            editDialog.setLocationRelativeTo(parentFrame);
+            JButton refreshButton = new JButton();
+            refreshButton.addActionListener(e -> loadData());
+            NguoiDungEditDialog editDialog =
+                new NguoiDungEditDialog(parentFrame, nd, adminController, refreshButton);
             editDialog.setVisible(true);
         }
 

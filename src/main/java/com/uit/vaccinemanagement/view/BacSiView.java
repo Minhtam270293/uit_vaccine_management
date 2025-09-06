@@ -5,6 +5,7 @@ import com.uit.vaccinemanagement.controller.BacSiController;
 
 import javax.swing.*;
 import com.uit.vaccinemanagement.view.SharedComponents;
+import com.uit.vaccinemanagement.view.dialogs.ChiDinhTiemDialog;
 import com.uit.vaccinemanagement.view.RoundedButton;
 import com.uit.vaccinemanagement.view.panels.TiemChungPanel;
 import com.uit.vaccinemanagement.view.panels.KhachHangPanel;

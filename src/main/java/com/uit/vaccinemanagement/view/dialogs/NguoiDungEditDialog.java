@@ -1,15 +1,17 @@
-package com.uit.vaccinemanagement.view;
+package com.uit.vaccinemanagement.view.dialogs;
 
 import com.uit.vaccinemanagement.model.NguoiDung;
-import com.uit.vaccinemanagement.controller.BacSiController;
+import com.uit.vaccinemanagement.controller.AdminController;
+import com.uit.vaccinemanagement.util.Role;
+import com.uit.vaccinemanagement.view.AuthButton;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class KhachHangEditDialog extends JDialog {
+public class NguoiDungEditDialog extends JDialog {
 
-    public KhachHangEditDialog(JFrame parent, NguoiDung khach, BacSiController controller, JButton btnRefresh) {
-        super(parent, "Sửa thông tin khách hàng", true);
+    public NguoiDungEditDialog(JFrame parent, NguoiDung nd, AdminController controller, JButton btnRefresh) {
+        super(parent, "Sửa người dùng", true);
         setSize(500, 450);
         setMinimumSize(new Dimension(500, 450));
         setMaximumSize(new Dimension(500, 450));
@@ -37,10 +39,9 @@ public class KhachHangEditDialog extends JDialog {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weightx = 1;
 
-        // Các trường thông tin khách hàng
         JLabel lblHoTen = new JLabel("Họ tên:");
         lblHoTen.setFont(labelFont);
-        JTextField tfHoTen = new JTextField(khach.getHoTen());
+        JTextField tfHoTen = new JTextField(nd.getHoTen());
         tfHoTen.setFont(uiFont);
         tfHoTen.setBorder(roundedBorder);
         tfHoTen.setPreferredSize(textFieldSize);
@@ -48,7 +49,7 @@ public class KhachHangEditDialog extends JDialog {
 
         JLabel lblEmail = new JLabel("Email:");
         lblEmail.setFont(labelFont);
-        JTextField tfEmail = new JTextField(khach.getEmail());
+        JTextField tfEmail = new JTextField(nd.getEmail());
         tfEmail.setFont(uiFont);
         tfEmail.setBorder(roundedBorder);
         tfEmail.setPreferredSize(textFieldSize);
@@ -56,7 +57,7 @@ public class KhachHangEditDialog extends JDialog {
 
         JLabel lblTenDangNhap = new JLabel("Tên đăng nhập:");
         lblTenDangNhap.setFont(labelFont);
-        JTextField tfTenDangNhap = new JTextField(khach.getTenDangNhap());
+        JTextField tfTenDangNhap = new JTextField(nd.getTenDangNhap());
         tfTenDangNhap.setFont(uiFont);
         tfTenDangNhap.setBorder(roundedBorder);
         tfTenDangNhap.setPreferredSize(textFieldSize);
@@ -64,20 +65,26 @@ public class KhachHangEditDialog extends JDialog {
 
         JLabel lblNgaySinh = new JLabel("Ngày sinh (yyyy-MM-dd):");
         lblNgaySinh.setFont(labelFont);
-        JTextField tfNgaySinh = new JTextField(khach.getNgaySinh() != null ? khach.getNgaySinh().toString() : "");
+        JTextField tfNgaySinh = new JTextField(nd.getNgaySinh() != null ? nd.getNgaySinh().toString() : "");
         tfNgaySinh.setFont(uiFont);
         tfNgaySinh.setBorder(roundedBorder);
         tfNgaySinh.setPreferredSize(textFieldSize);
         tfNgaySinh.setOpaque(false);
+
+        JLabel lblVaiTro = new JLabel("Vai trò:");
+        lblVaiTro.setFont(labelFont);
+        JComboBox<Role> cbVaiTro = new JComboBox<>(Role.values());
+        cbVaiTro.setFont(uiFont);
+        cbVaiTro.setPreferredSize(textFieldSize);
+        cbVaiTro.setSelectedItem(nd.getVaiTro());
 
         JLabel lblGioiTinh = new JLabel("Giới tính:");
         lblGioiTinh.setFont(labelFont);
         JComboBox<String> cbGioiTinh = new JComboBox<>(new String[]{"Nam", "Nữ", "Khác"});
         cbGioiTinh.setFont(uiFont);
         cbGioiTinh.setPreferredSize(textFieldSize);
-        cbGioiTinh.setSelectedItem(khach.getGioiTinh());
+        cbGioiTinh.setSelectedItem(nd.getGioiTinh());
 
-        // Thêm các trường vào fieldsPanel
         int row = 0;
         gbc.gridx = 0; gbc.gridy = row; fieldsPanel.add(lblHoTen, gbc);
         gbc.gridx = 1; gbc.gridy = row++; fieldsPanel.add(tfHoTen, gbc);
@@ -87,10 +94,11 @@ public class KhachHangEditDialog extends JDialog {
         gbc.gridx = 1; gbc.gridy = row++; fieldsPanel.add(tfTenDangNhap, gbc);
         gbc.gridx = 0; gbc.gridy = row; fieldsPanel.add(lblNgaySinh, gbc);
         gbc.gridx = 1; gbc.gridy = row++; fieldsPanel.add(tfNgaySinh, gbc);
+        gbc.gridx = 0; gbc.gridy = row; fieldsPanel.add(lblVaiTro, gbc);
+        gbc.gridx = 1; gbc.gridy = row++; fieldsPanel.add(cbVaiTro, gbc);
         gbc.gridx = 0; gbc.gridy = row; fieldsPanel.add(lblGioiTinh, gbc);
         gbc.gridx = 1; gbc.gridy = row++; fieldsPanel.add(cbGioiTinh, gbc);
 
-        // Panel cho nút
         JPanel buttonPanelWrapper = new JPanel();
         buttonPanelWrapper.setLayout(new BoxLayout(buttonPanelWrapper, BoxLayout.Y_AXIS));
         buttonPanelWrapper.setOpaque(false);
@@ -126,6 +134,7 @@ public class KhachHangEditDialog extends JDialog {
                 String tenDangNhap = tfTenDangNhap.getText().trim();
                 String ngaySinhStr = tfNgaySinh.getText().trim();
                 String gioiTinh = cbGioiTinh.getSelectedItem().toString();
+                Role vaiTro = (Role) cbVaiTro.getSelectedItem();
 
                 if (hoTen.isEmpty()) {
                     JOptionPane.showMessageDialog(this, "Họ tên không được để trống!");
@@ -142,14 +151,14 @@ public class KhachHangEditDialog extends JDialog {
                     }
                 }
 
-                boolean success = controller.updateKhach(
-                    khach.getMaNguoiDung(),
-                    hoTen,
-                    tenDangNhap,
-                    email,
-                    ngaySinh,
-                    gioiTinh
-                );
+                nd.setHoTen(hoTen);
+                nd.setTenDangNhap(tenDangNhap);
+                nd.setEmail(email);
+                nd.setNgaySinh(ngaySinh);
+                nd.setGioiTinh(gioiTinh);
+                nd.setVaiTro(vaiTro);
+
+                boolean success = controller.updateNguoiDung(nd);
                 if (success) {
                     JOptionPane.showMessageDialog(this, "Cập nhật thành công!");
                     dispose();
@@ -200,4 +209,3 @@ public class KhachHangEditDialog extends JDialog {
         }
     }
 }
-

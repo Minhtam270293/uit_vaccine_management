@@ -1,9 +1,10 @@
-package com.uit.vaccinemanagement.view;
+package com.uit.vaccinemanagement.view.dialogs;
 
 import com.uit.vaccinemanagement.controller.AdminController;
 import com.uit.vaccinemanagement.model.Vaccine;
 import com.uit.vaccinemanagement.model.Benh;
 import com.uit.vaccinemanagement.model.NhaSanXuat;
+import com.uit.vaccinemanagement.view.AuthButton;
 
 import javax.swing.*;
 import java.awt.*;
@@ -119,7 +120,6 @@ public class VaccineAddDialog extends JDialog {
         JComboBox<String> cbBenh = new JComboBox<>();
         cbBenh.setFont(uiFont);
         cbBenh.setPreferredSize(textFieldSize);
-        cbBenh.setBorder(roundedBorder);
         
         // Populate diseases
         List<Benh> benhList = controller.getAllBenh();
@@ -133,7 +133,6 @@ public class VaccineAddDialog extends JDialog {
         JComboBox<String> cbNSX = new JComboBox<>();
         cbNSX.setFont(uiFont);
         cbNSX.setPreferredSize(textFieldSize);
-        cbNSX.setBorder(roundedBorder);
         
         // Populate manufacturers
         List<NhaSanXuat> nsxList = controller.getAllNhaSanXuat();

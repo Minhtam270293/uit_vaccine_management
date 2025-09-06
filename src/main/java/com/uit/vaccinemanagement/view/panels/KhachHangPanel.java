@@ -2,6 +2,7 @@ package com.uit.vaccinemanagement.view.panels;
 
 import com.uit.vaccinemanagement.controller.BacSiController;
 import com.uit.vaccinemanagement.model.NguoiDung;
+import com.uit.vaccinemanagement.view.dialogs.KhachHangEditDialog;
 import javax.swing.*;
 import javax.swing.table.*;
 import java.awt.*;
@@ -278,8 +279,8 @@ public class KhachHangPanel extends JPanel {
 
             JButton refreshButton = new JButton();
             refreshButton.addActionListener(e -> loadData());
-            com.uit.vaccinemanagement.view.KhachHangEditDialog editDialog =
-                new com.uit.vaccinemanagement.view.KhachHangEditDialog(parentFrame, khach, bacSiController, refreshButton);
+            KhachHangEditDialog editDialog =
+                new KhachHangEditDialog(parentFrame, khach, bacSiController, refreshButton);
             editDialog.setVisible(true);
         }
 
@@ -299,4 +300,3 @@ public class KhachHangPanel extends JPanel {
         }
     }
 }
-          
