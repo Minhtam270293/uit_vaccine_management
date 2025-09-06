@@ -196,7 +196,7 @@ public class TiemChungPanel extends JPanel {
     }
 
     private void updateTable(List<Object[]> data) {
-        String[] columns = {"Mã tiêm chủng", "Ngày tiêm", "Tên vắc xin", "Tên khách", "Trạng thái", "Ghi chú", "Thao tác"};
+        String[] columns = {"Mã TC", "Ngày tiêm", "Tên vắc xin", "Tên khách", "Trạng thái", "Ghi chú", "Thao tác"};
         DefaultTableModel model = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {

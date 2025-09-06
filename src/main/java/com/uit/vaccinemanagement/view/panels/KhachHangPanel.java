@@ -201,7 +201,7 @@ public class KhachHangPanel extends JPanel {
 
     private void updateTable(List<NguoiDung> data) {
         String[] columns = {
-            "Mã người dùng", "Họ tên", "Tên đăng nhập", "Email",
+            "Mã ND", "Họ tên", "Tên đăng nhập", "Email",
             "Ngày sinh", "Giới tính", "Thao tác"
         };
 
@@ -221,6 +221,16 @@ public class KhachHangPanel extends JPanel {
 
         table.setModel(model);
         setupTableProperties();
+
+        JTableHeader header = table.getTableHeader();
+        header.setFont(new Font("Arial", Font.BOLD, 14)); // Đặt font chữ in đậm cho tiêu đề cột
+        table.setTableHeader(header);
+
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+        table.getColumnModel().getColumn(0).setCellRenderer(centerRenderer); // Canh giữa cột "Mã ND"
+        table.getColumnModel().getColumn(4).setCellRenderer(centerRenderer); // Canh giữa cột "Ngày sinh"
+        table.getColumnModel().getColumn(5).setCellRenderer(centerRenderer); // Canh giữa cột "Giới tính"
     }
 
     private void setupTableProperties() {

@@ -9,6 +9,7 @@ import com.uit.vaccinemanagement.view.RoundedButton;
 
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.List;
@@ -199,7 +200,7 @@ public class KhachView {
 
             // Lấy dữ liệu từ DAO
             List<Object[]> data = tiemChungDAO.getByMaKhach(currentUser.getMaNguoiDung());
-            String[] columns = {"Mã tiêm chủng", "Ngày tiêm", "Tên vắc xin", "Bác sĩ phụ trách", "Trạng thái tiêm", "Ghi chú"};
+            String[] columns = {"Mã TC", "Ngày tiêm", "Tên vắc xin", "Bác sĩ phụ trách", "Trạng thái tiêm", "Ghi chú"};
 
             // Tạo model mới
             DefaultTableModel model = new DefaultTableModel(columns, 0);
@@ -216,6 +217,11 @@ public class KhachView {
             table.getColumnModel().getColumn(0).setCellRenderer(centerRenderer);
             table.getColumnModel().getColumn(2).setCellRenderer(centerRenderer);
             table.getColumnModel().getColumn(3).setCellRenderer(centerRenderer);
+
+            // Đặt font chữ in đậm cho tiêu đề cột
+            JTableHeader header = table.getTableHeader();
+            header.setFont(new Font("Arial", Font.BOLD, 14));
+            table.setTableHeader(header);
         });
 
         frame.setVisible(true);
