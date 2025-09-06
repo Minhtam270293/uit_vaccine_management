@@ -3,6 +3,9 @@ package com.uit.vaccinemanagement.view;
 import com.uit.vaccinemanagement.controller.AdminController;
 import com.uit.vaccinemanagement.model.Vaccine;
 import com.uit.vaccinemanagement.dao.VaccineDAO;
+import com.uit.vaccinemanagement.model.Benh;
+import com.uit.vaccinemanagement.model.NhaSanXuat;
+import java.util.List;
 
 import javax.swing.*;
 import java.awt.*;
@@ -151,25 +154,45 @@ public class VaccineEditDialog extends JDialog {
         tfMoTa.setMaximumSize(textFieldSize);
         tfMoTa.setOpaque(false);
 
-        JLabel lblMaBenh = new JLabel("Mã bệnh:");
+        JLabel lblMaBenh = new JLabel("Bệnh:");
         lblMaBenh.setFont(labelFont);
-        JTextField tfMaBenh = new JTextField(vc.getMaBenh());
-        tfMaBenh.setFont(uiFont);
-        tfMaBenh.setBorder(roundedBorder);
-        tfMaBenh.setPreferredSize(textFieldSize);
-        tfMaBenh.setMinimumSize(textFieldSize);
-        tfMaBenh.setMaximumSize(textFieldSize);
-        tfMaBenh.setOpaque(false);
+        JComboBox<String> cbBenh = new JComboBox<>();
+        cbBenh.setFont(uiFont);
+        cbBenh.setPreferredSize(textFieldSize);
+        cbBenh.setMinimumSize(textFieldSize);
+        cbBenh.setMaximumSize(textFieldSize);
+        cbBenh.setBorder(roundedBorder);
 
-        JLabel lblMaNhaSX = new JLabel("Mã NSX:");
+        // Populate diseases
+        List<Benh> benhList = controller.getAllBenh();
+        String currentBenh = vc.getMaBenh();
+        for (Benh benh : benhList) {
+            String item = benh.getMaBenh() + " - " + benh.getTenBenh();
+            cbBenh.addItem(item);
+            if (benh.getMaBenh().equals(currentBenh)) {
+                cbBenh.setSelectedItem(item);
+            }
+        }
+
+        JLabel lblMaNhaSX = new JLabel("Nhà sản xuất:");
         lblMaNhaSX.setFont(labelFont);
-        JTextField tfMaNhaSX = new JTextField(vc.getMaNhaSX());
-        tfMaNhaSX.setFont(uiFont);
-        tfMaNhaSX.setBorder(roundedBorder);
-        tfMaNhaSX.setPreferredSize(textFieldSize);
-        tfMaNhaSX.setMinimumSize(textFieldSize);
-        tfMaNhaSX.setMaximumSize(textFieldSize);
-        tfMaNhaSX.setOpaque(false);
+        JComboBox<String> cbNhaSX = new JComboBox<>();
+        cbNhaSX.setFont(uiFont);
+        cbNhaSX.setPreferredSize(textFieldSize);
+        cbNhaSX.setMinimumSize(textFieldSize);
+        cbNhaSX.setMaximumSize(textFieldSize);
+
+        // Populate manufacturers
+        List<NhaSanXuat> nsxList = controller.getAllNhaSanXuat();
+        String currentNhaSX = vc.getMaNhaSX();
+        for (NhaSanXuat nsx : nsxList) {
+            String item = nsx.getMaNhaSX() + " - " + nsx.getTenNhaSX();
+            cbNhaSX.addItem(item);
+            if (nsx.getMaNhaSX().equals(currentNhaSX)) {
+                cbNhaSX.setSelectedItem(item);
+            }
+        }
+        cbNhaSX.setBorder(roundedBorder);
 
         JLabel lblNgayTao = new JLabel("Ngày tạo:");
         lblNgayTao.setFont(labelFont);
@@ -254,13 +277,13 @@ public class VaccineEditDialog extends JDialog {
         fieldsPanel.add(lblMaBenh, gbc);
         gbc.gridx = 1;
         gbc.gridy = row++;
-        fieldsPanel.add(tfMaBenh, gbc);
+        fieldsPanel.add(cbBenh, gbc);
         gbc.gridx = 0;
         gbc.gridy = row;
         fieldsPanel.add(lblMaNhaSX, gbc);
         gbc.gridx = 1;
         gbc.gridy = row++;
-        fieldsPanel.add(tfMaNhaSX, gbc);
+        fieldsPanel.add(cbNhaSX, gbc);
         gbc.gridx = 0;
         gbc.gridy = row;
         fieldsPanel.add(lblNgayTao, gbc);
@@ -304,8 +327,14 @@ public class VaccineEditDialog extends JDialog {
                 vc.setGiaNhap(tfGiaNhap.getText().isEmpty() ? 0 : Double.parseDouble(tfGiaNhap.getText().trim()));
                 vc.setGiaBan(tfGiaBan.getText().isEmpty() ? 0 : Double.parseDouble(tfGiaBan.getText().trim()));
                 vc.setMoTa(tfMoTa.getText().trim());
-                vc.setMaBenh(tfMaBenh.getText().trim());
-                vc.setMaNhaSX(tfMaNhaSX.getText().trim());
+
+                String selectedBenh = cbBenh.getSelectedItem().toString();
+                String maBenh = selectedBenh.split(" - ")[0];
+                vc.setMaBenh(maBenh);
+
+                String selectedNSX = cbNhaSX.getSelectedItem().toString();
+                String maNhaSX = selectedNSX.split(" - ")[0];
+                vc.setMaNhaSX(maNhaSX);
                 vc.setNgayTao(tfNgayTao.getText().isEmpty() ? null : java.sql.Timestamp.valueOf(tfNgayTao.getText().trim()));
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, "Lỗi dữ liệu: " + ex.getMessage());

@@ -50,8 +50,6 @@ public class VaccineAddDialog extends JDialog {
         );
 
         // Get list for combobox
-        List<NhaSanXuat> nsxList = controller.getAllNhaSanXuat();
-
         // Create input fields with rounded borders
         JLabel lblTenVaccine = new JLabel("Tên vaccine:");
         lblTenVaccine.setFont(uiFont);
@@ -116,18 +114,33 @@ public class VaccineAddDialog extends JDialog {
         JScrollPane spMoTa = new JScrollPane(taMoTa);
         spMoTa.setBorder(roundedBorder);
 
-        JLabel lblBenh = new JLabel("Mã bệnh:");
+        JLabel lblBenh = new JLabel("Bệnh:");
         lblBenh.setFont(uiFont);
-        JTextField tfBenh = new JTextField();
-        tfBenh.setFont(uiFont);
-        tfBenh.setPreferredSize(textFieldSize);
-        tfBenh.setBorder(roundedBorder);
+        JComboBox<String> cbBenh = new JComboBox<>();
+        cbBenh.setFont(uiFont);
+        cbBenh.setPreferredSize(textFieldSize);
+        cbBenh.setBorder(roundedBorder);
+        
+        // Populate diseases
+        List<Benh> benhList = controller.getAllBenh();
+        for (Benh benh : benhList) {
+            String item = benh.getMaBenh() + " - " + benh.getTenBenh();
+            cbBenh.addItem(item);
+        }
 
         JLabel lblNSX = new JLabel("Nhà sản xuất:");
         lblNSX.setFont(uiFont);
-        JComboBox<NhaSanXuat> cbNSX = new JComboBox<>(nsxList.toArray(new NhaSanXuat[0]));
+        JComboBox<String> cbNSX = new JComboBox<>();
         cbNSX.setFont(uiFont);
         cbNSX.setPreferredSize(textFieldSize);
+        cbNSX.setBorder(roundedBorder);
+        
+        // Populate manufacturers
+        List<NhaSanXuat> nsxList = controller.getAllNhaSanXuat();
+        for (NhaSanXuat nsx : nsxList) {
+            String item = nsx.getMaNhaSX() + " - " + nsx.getTenNhaSX();
+            cbNSX.addItem(item);
+        }
 
         // Add components to panel using GridBagLayout
         int row = 0;
@@ -184,7 +197,7 @@ public class VaccineAddDialog extends JDialog {
         panel.add(lblBenh, gbc);
         gbc.gridx = 1;
         gbc.gridy = row++;
-        panel.add(tfBenh, gbc);
+        panel.add(cbBenh, gbc);
         gbc.gridx = 0;
         gbc.gridy = row;
         panel.add(lblNSX, gbc);
@@ -239,13 +252,13 @@ public class VaccineAddDialog extends JDialog {
                 String giaNhapStr = tfGiaNhap.getText().trim();
                 String giaBanStr = tfGiaBan.getText().trim();
                 String moTa = taMoTa.getText().trim();
-                String maBenhStr = tfBenh.getText().trim();
-                NhaSanXuat nsx = (NhaSanXuat) cbNSX.getSelectedItem();
+                String selectedBenh = cbBenh.getSelectedItem().toString();
+                String selectedNSX = cbNSX.getSelectedItem().toString();
 
                 // Validation
                 if (tenVaccine.isEmpty() || soLo.isEmpty() || ngaySXStr.isEmpty()
                         || ngayHHStr.isEmpty() || tongSLStr.isEmpty() || giaNhapStr.isEmpty()
-                        || giaBanStr.isEmpty() || maBenhStr.isEmpty()) {
+                        || giaBanStr.isEmpty() || selectedBenh == null || selectedNSX == null) {
                     JOptionPane.showMessageDialog(this, "Vui lòng điền đầy đủ thông tin bắt buộc!",
                             "Lỗi", JOptionPane.ERROR_MESSAGE);
                     return;
@@ -288,8 +301,12 @@ public class VaccineAddDialog extends JDialog {
                 vaccine.setGiaNhap(giaNhap);
                 vaccine.setGiaBan(giaBan);
                 vaccine.setMoTa(moTa);
-                vaccine.setMaBenh(maBenhStr);
-                vaccine.setMaNhaSX(nsx.getMaNhaSX());
+                
+                String maBenh = selectedBenh.split(" - ")[0];
+                String maNhaSX = selectedNSX.split(" - ")[0];
+                vaccine.setMaBenh(maBenh);
+                vaccine.setMaNhaSX(maNhaSX);
+                
                 vaccine.setNgayTao(new java.sql.Timestamp(System.currentTimeMillis()));
 
                 if (controller.addVaccine(vaccine)) {
