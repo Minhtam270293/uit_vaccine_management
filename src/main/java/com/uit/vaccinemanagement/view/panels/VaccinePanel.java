@@ -166,7 +166,7 @@ public class VaccinePanel extends JPanel {
             String downloadUrl = "https://example.com/file.xlsx"; // link cố định
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setDialogTitle("Chọn nơi lưu file");
-            fileChooser.setSelectedFile(new java.io.File("nguoi_dung.xlsx"));
+            fileChooser.setSelectedFile(new java.io.File("vaccine.xlsx"));
 
             int userSelection = fileChooser.showSaveDialog(parentFrame);
             if (userSelection == JFileChooser.APPROVE_OPTION) {

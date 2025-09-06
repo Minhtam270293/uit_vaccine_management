@@ -141,7 +141,7 @@ public class NhaSanXuatPanel extends JPanel {
             String downloadUrl = "https://example.com/file.xlsx"; // link cố định
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setDialogTitle("Chọn nơi lưu file");
-            fileChooser.setSelectedFile(new java.io.File("nguoi_dung.xlsx"));
+            fileChooser.setSelectedFile(new java.io.File("nha_SX.xlsx"));
 
             int userSelection = fileChooser.showSaveDialog(parentFrame);
             if (userSelection == JFileChooser.APPROVE_OPTION) {
