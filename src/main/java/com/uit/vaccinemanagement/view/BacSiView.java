@@ -1,7 +1,5 @@
 package com.uit.vaccinemanagement.view;
 
-import com.uit.vaccinemanagement.dao.TiemChungDAO;
-import com.uit.vaccinemanagement.dao.NguoiDungDAO;
 import com.uit.vaccinemanagement.model.NguoiDung;
 import com.uit.vaccinemanagement.controller.BacSiController;
 
@@ -9,17 +7,10 @@ import javax.swing.*;
 import com.uit.vaccinemanagement.view.SharedComponents;
 import com.uit.vaccinemanagement.view.RoundedButton;
 import com.uit.vaccinemanagement.view.panels.TiemChungPanel;
-
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.JTableHeader;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
+import com.uit.vaccinemanagement.view.panels.KhachHangPanel;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.util.List;
 
 public class BacSiView {
 
@@ -135,216 +126,37 @@ public class BacSiView {
             dialog.setVisible(true);
         });
 
-        // Right panel (column 2)
-        JPanel rightPanel = new JPanel(new BorderLayout());
-        // ======= 1. Title =======
-        JLabel tableTitle = new JLabel("Thông tin", SwingConstants.CENTER);
-        tableTitle.setFont(new Font("Arial", Font.BOLD, 18));
-        tableTitle.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0)); // padding trên dưới
-        // ======= 2. Search bar =======
-        JPanel topPanel = new JPanel();
-        topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.X_AXIS));
-        //
-        JTextField searchField = new JTextField();
-        searchField.setPreferredSize(new Dimension(200, 30));
-        topPanel.add(new JLabel("Tìm kiếm người dùng"));
-        topPanel.add(Box.createHorizontalStrut(5));
-        topPanel.add(searchField);
-        topPanel.add(Box.createHorizontalStrut(20));
-        topPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+        // Right panel (column 2) with CardLayout
+        JPanel rightPanel = new JPanel(new CardLayout());
+        CardLayout cardLayout = (CardLayout) rightPanel.getLayout();
 
-        // Action buttons
-        JButton btnDownload = new JButton("Tải danh sách");
-        JButton btnAdd = new JButton("Thêm mới");
-        topPanel.add(btnDownload);
-        topPanel.add(Box.createHorizontalStrut(10));
-        topPanel.add(btnAdd);
+        // Create TiemChungPanel and KhachHangPanel
+        TiemChungPanel tiemChungPanel = new TiemChungPanel(frame, bacSiController, currentUser);
+        KhachHangPanel khachHangPanel = new KhachHangPanel(frame, bacSiController, currentUser);
 
-        // ======= Wrapper chứa Title + Search =======
-        JPanel headerPanel = new JPanel(new BorderLayout());
-        headerPanel.add(tableTitle, BorderLayout.NORTH);
-        headerPanel.add(topPanel, BorderLayout.SOUTH);
-
-        // Add vào NORTH
-        rightPanel.add(headerPanel, BorderLayout.NORTH);
-
-        // ======= 3. Table dữ liệu =======
-        JTable table = new JTable();
-        JScrollPane scrollPane = new JScrollPane(table);
-        rightPanel.add(scrollPane, BorderLayout.CENTER);
-
-        // ======= 4. Phân trang =======
-        JPanel paginationPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        JButton btnPrev = new JButton("<<");
-        JButton btnNext = new JButton(">>");
-        JLabel lblPageInfo = new JLabel("Trang 1/1");
-        JLabel lblTotalRows = new JLabel("Tổng số: 1");
-
-        paginationPanel.add(lblTotalRows);
-        paginationPanel.add(btnPrev);
-        paginationPanel.add(lblPageInfo);
-        paginationPanel.add(btnNext);
-
-        rightPanel.add(paginationPanel, BorderLayout.SOUTH);
+        // Add panels to cardlayout with unique names
+        rightPanel.add(tiemChungPanel, "TIEMCHUNG");
+        rightPanel.add(khachHangPanel, "KHACHHANG");
 
         // Split pane
         JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, rightPanel);
         splitPane.setDividerLocation(220);
         frame.getContentPane().add(splitPane);
 
-        // -----------------------------------------------------------------------------------------------------------
-        // Danh sách tiêm chủng
+        // Show TiemChungPanel by default
+        cardLayout.show(rightPanel, "TIEMCHUNG");
+        frame.setSize(1180, 500);
+
+        // Button action listeners
         btnTiemChung.addActionListener((ActionEvent e) -> {
+            cardLayout.show(rightPanel, "TIEMCHUNG");
             frame.setSize(1180, 500);
-            TiemChungPanel tiemChungPanel = new TiemChungPanel(frame, bacSiController, currentUser);
-
-            // Replace content in right panel
-            rightPanel.removeAll();
-            rightPanel.add(tiemChungPanel, BorderLayout.CENTER);
-            rightPanel.revalidate();
-            rightPanel.repaint();
         });
 
-        // Danh sách khách hàng
         btnKhachHang.addActionListener((ActionEvent e) -> {
+            cardLayout.show(rightPanel, "KHACHHANG");
             frame.setSize(1250, 500);
-            tableTitle.setText("QUẢN LÝ KHÁCH HÀNG");
-            List<NguoiDung> khachList = bacSiController.getDefaultKhachHangPage();
-
-            String[] columns = {"Mã KH", "Họ Tên", "Tên đăng nhập", "Email", "Vai trò", "Ngày tạo", "Ngày sinh", "Giới tính", "Thao tác"};
-            DefaultTableModel model = new DefaultTableModel(columns, 0) {
-                @Override
-                public boolean isCellEditable(int row, int column) {
-                    return column == 8; // chỉ cho phép edit cột Thao tác
-                }
-            };
-
-            for (NguoiDung nd : khachList) {
-                model.addRow(new Object[]{
-                    nd.getMaNguoiDung(),
-                    nd.getHoTen(),
-                    nd.getTenDangNhap(),
-                    nd.getEmail(),
-                    nd.getVaiTro(),
-                    nd.getNgayTao(),
-                    nd.getNgaySinh(),
-                    nd.getGioiTinh(),
-                    "Thao tác"
-                });
-            }
-
-            JTable newTable = new JTable(model);
-            newTable.setFillsViewportHeight(true);
-            newTable.setRowHeight(30);
-            newTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-            newTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
-            // Header style
-            JTableHeader header = newTable.getTableHeader();
-            header.setFont(new Font("Arial", Font.BOLD, 14));
-            header.setReorderingAllowed(false);
-            header.setResizingAllowed(true);
-
-            // Set độ rộng cột
-            TableColumnModel columnModel = newTable.getColumnModel();
-            columnModel.getColumn(0).setPreferredWidth(60);   // Mã KH
-            columnModel.getColumn(1).setPreferredWidth(120);  // Họ Tên
-            columnModel.getColumn(2).setPreferredWidth(120);  // Tên đăng nhập
-            columnModel.getColumn(3).setPreferredWidth(200);  // Email
-            columnModel.getColumn(4).setPreferredWidth(80);   // Vai trò
-            columnModel.getColumn(5).setPreferredWidth(100);  // Ngày tạo
-            columnModel.getColumn(6).setPreferredWidth(100);  // Ngày sinh
-            columnModel.getColumn(7).setPreferredWidth(80);   // Giới tính
-            columnModel.getColumn(8).setPreferredWidth(120);  // Thao tác
-
-            // Renderer căn giữa cho mấy cột mã + vai trò + ngày sinh + giới tính
-            DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-            centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
-            newTable.getColumnModel().getColumn(0).setCellRenderer(centerRenderer); // Mã KH
-            newTable.getColumnModel().getColumn(4).setCellRenderer(centerRenderer); // Vai trò
-            newTable.getColumnModel().getColumn(6).setCellRenderer(centerRenderer); // Ngày sinh
-            newTable.getColumnModel().getColumn(7).setCellRenderer(centerRenderer); // Giới tính
-
-            // --- Thêm nút Edit + Delete ---
-            TableColumn actionColumn = newTable.getColumnModel().getColumn(8);
-            actionColumn.setCellRenderer(new TableCellRenderer() {
-                private final JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
-                private final JButton btnEdit = new JButton("✎");
-                private final JButton btnDelete = new JButton("🗑");
-
-                {
-                    btnEdit.setPreferredSize(new Dimension(50, 25));
-                    btnDelete.setPreferredSize(new Dimension(50, 25));
-                    panel.add(btnEdit);
-                    panel.add(btnDelete);
-                }
-
-                @Override
-                public Component getTableCellRendererComponent(JTable table, Object value,
-                                                            boolean isSelected, boolean hasFocus, int row, int column) {
-                    return panel;
-                }
-            });
-
-            actionColumn.setCellEditor(new DefaultCellEditor(new JCheckBox()) {
-                private final JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 0));
-                private final JButton btnEdit = new JButton("✎");
-                private final JButton btnDelete = new JButton("🗑");
-
-                {
-                    btnEdit.setPreferredSize(new Dimension(50, 25));
-                    btnDelete.setPreferredSize(new Dimension(50, 25));
-                    panel.add(btnEdit);
-                    panel.add(btnDelete);
-
-                    btnEdit.addActionListener(ev -> {
-                        int row = newTable.getSelectedRow();
-                        if (row != -1) {
-                            String maKH = newTable.getValueAt(row, 0).toString();
-                            JOptionPane.showMessageDialog(frame, "Edit khách hàng: " + maKH);
-                            // TODO: Mở dialog edit khách hàng ở đây
-                        }
-                    });
-
-                    btnDelete.addActionListener(ev -> {
-                        int row = newTable.getSelectedRow();
-                        if (row != -1) {
-                            String maKH = newTable.getValueAt(row, 0).toString();
-                            int confirm = JOptionPane.showConfirmDialog(frame,
-                                    "Xóa khách hàng " + maKH + " ?",
-                                    "Xác nhận",
-                                    JOptionPane.YES_NO_OPTION);
-                            if (confirm == JOptionPane.YES_OPTION) {
-                                // TODO: gọi bacSiController.deleteKhachHang(maKH)
-                                JOptionPane.showMessageDialog(frame, "Đã xóa khách hàng: " + maKH);
-                            }
-                        }
-                    });
-                }
-
-                @Override
-                public Component getTableCellEditorComponent(JTable table, Object value,
-                                                            boolean isSelected, int row, int column) {
-                    return panel;
-                }
-
-                @Override
-                public Object getCellEditorValue() {
-                    return "";
-                }
-            });
-
-            JScrollPane newScrollPane = new JScrollPane(newTable);
-
-            // Replace table trên giao diện
-            rightPanel.removeAll();
-            rightPanel.add(headerPanel, BorderLayout.NORTH);
-            rightPanel.add(newScrollPane, BorderLayout.CENTER);
-            rightPanel.revalidate();
-            rightPanel.repaint();
-            rightPanel.add(paginationPanel, BorderLayout.SOUTH);
         });
-
 
         frame.setVisible(true);
     }

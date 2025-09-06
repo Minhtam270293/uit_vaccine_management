@@ -53,6 +53,18 @@ public class VaccineDAO {
         }
     }
 
+    public boolean increaseQuantity(String maVaccine) {
+        String sql = "UPDATE `Vaccine` SET `sl_con_lai` = `sl_con_lai` + 1 WHERE `ma_vaccine` = ? AND `sl_con_lai` < tong_sl";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, maVaccine);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     public List<Object[]> getAvailableVaccines() {
         List<Object[]> result = new ArrayList<>();
         String sql = """

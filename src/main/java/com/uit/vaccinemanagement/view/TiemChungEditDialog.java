@@ -1,8 +1,10 @@
 package com.uit.vaccinemanagement.view;
 
 import com.uit.vaccinemanagement.controller.BacSiController;
+import com.uit.vaccinemanagement.model.NguoiDung;
 import javax.swing.*;
 import java.awt.*;
+import java.util.List;
 
 public class TiemChungEditDialog extends JDialog {
 
@@ -59,35 +61,50 @@ public class TiemChungEditDialog extends JDialog {
 
         JLabel lblTenVaccine = new JLabel("Tên vaccine:");
         lblTenVaccine.setFont(labelFont);
-        JTextField tfTenVaccine = new JTextField(tiemChungData[2].toString());
-        tfTenVaccine.setFont(uiFont);
-        tfTenVaccine.setBorder(roundedBorder);
-        tfTenVaccine.setPreferredSize(textFieldSize);
-        tfTenVaccine.setMinimumSize(textFieldSize);
-        tfTenVaccine.setMaximumSize(textFieldSize);
-        tfTenVaccine.setOpaque(false);
-        tfTenVaccine.setEditable(false);
+        JComboBox<String> cbVaccine = new JComboBox<>();
+        cbVaccine.setFont(uiFont);
+        cbVaccine.setPreferredSize(textFieldSize);
+        cbVaccine.setMinimumSize(textFieldSize);
+        cbVaccine.setMaximumSize(textFieldSize);
+        // Populate vaccines
+        List<Object[]> vaccines = controller.getAvailableVaccines();
+        String currentVaccine = tiemChungData[2].toString();
+        for (Object[] v : vaccines) {
+            String maVaccine = (String) v[0];
+            String tenVaccine = (String) v[1];
+            String item = maVaccine + " - " + tenVaccine;
+            cbVaccine.addItem(item);
+            if (tenVaccine.equals(currentVaccine)) {
+                cbVaccine.setSelectedItem(item);
+            }
+        }
 
         JLabel lblTenKhach = new JLabel("Tên khách:");
         lblTenKhach.setFont(labelFont);
-        JTextField tfTenKhach = new JTextField(tiemChungData[3].toString());
-        tfTenKhach.setFont(uiFont);
-        tfTenKhach.setBorder(roundedBorder);
-        tfTenKhach.setPreferredSize(textFieldSize);
-        tfTenKhach.setMinimumSize(textFieldSize);
-        tfTenKhach.setMaximumSize(textFieldSize);
-        tfTenKhach.setOpaque(false);
-        tfTenKhach.setEditable(false);
+        JComboBox<String> cbKhach = new JComboBox<>();
+        cbKhach.setFont(uiFont);
+        cbKhach.setPreferredSize(textFieldSize);
+        cbKhach.setMinimumSize(textFieldSize);
+        cbKhach.setMaximumSize(textFieldSize);
+        // Populate customers
+        List<NguoiDung> khachList = controller.getAllCustomers();
+        String currentKhach = tiemChungData[3].toString();
+        for (NguoiDung khach : khachList) {
+            String item = khach.getMaNguoiDung() + " - " + khach.getHoTen();
+            cbKhach.addItem(item);
+            if (khach.getHoTen().equals(currentKhach)) {
+                cbKhach.setSelectedItem(item);
+            }
+        }
 
         JLabel lblTrangThai = new JLabel("Trạng thái:");
         lblTrangThai.setFont(labelFont);
-        JTextField tfTrangThai = new JTextField(tiemChungData[4].toString());
-        tfTrangThai.setFont(uiFont);
-        tfTrangThai.setBorder(roundedBorder);
-        tfTrangThai.setPreferredSize(textFieldSize);
-        tfTrangThai.setMinimumSize(textFieldSize);
-        tfTrangThai.setMaximumSize(textFieldSize);
-        tfTrangThai.setOpaque(false);
+        JComboBox<String> cbTrangThai = new JComboBox<>(new String[]{"cho_tiem", "da_tiem", "huy"});
+        cbTrangThai.setFont(uiFont);
+        cbTrangThai.setPreferredSize(textFieldSize);
+        cbTrangThai.setMinimumSize(textFieldSize);
+        cbTrangThai.setMaximumSize(textFieldSize);
+        cbTrangThai.setSelectedItem(tiemChungData[4].toString());
 
         JLabel lblGhiChu = new JLabel("Ghi chú:");
         lblGhiChu.setFont(labelFont);
@@ -120,21 +137,21 @@ public class TiemChungEditDialog extends JDialog {
         fieldsPanel.add(lblTenVaccine, gbc);
         gbc.gridx = 1;
         gbc.gridy = row++;
-        fieldsPanel.add(tfTenVaccine, gbc);
+        fieldsPanel.add(cbVaccine, gbc);
 
         gbc.gridx = 0;
         gbc.gridy = row;
         fieldsPanel.add(lblTenKhach, gbc);
         gbc.gridx = 1;
         gbc.gridy = row++;
-        fieldsPanel.add(tfTenKhach, gbc);
+        fieldsPanel.add(cbKhach, gbc);
 
         gbc.gridx = 0;
         gbc.gridy = row;
         fieldsPanel.add(lblTrangThai, gbc);
         gbc.gridx = 1;
         gbc.gridy = row++;
-        fieldsPanel.add(tfTrangThai, gbc);
+        fieldsPanel.add(cbTrangThai, gbc);
 
         gbc.gridx = 0;
         gbc.gridy = row;
@@ -169,12 +186,18 @@ public class TiemChungEditDialog extends JDialog {
 
         btnSave.addActionListener(e -> {
             try {
+                String selectedVaccine = cbVaccine.getSelectedItem().toString();
+                String maVaccine = selectedVaccine.split(" - ")[0];
+                
+                String selectedKhach = cbKhach.getSelectedItem().toString();
+                String maKhach = selectedKhach.split(" - ")[0];
+
                 Object[] updatedData = {
                     tfMaTiemChung.getText().trim(),
                     tfNgayTiem.getText().trim(),
-                    tfTenVaccine.getText().trim(),
-                    tfTenKhach.getText().trim(),
-                    tfTrangThai.getText().trim(),
+                    maVaccine,
+                    maKhach,
+                    cbTrangThai.getSelectedItem().toString(),
                     tfGhiChu.getText().trim()
                 };
 

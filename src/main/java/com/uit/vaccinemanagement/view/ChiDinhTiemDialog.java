@@ -86,7 +86,7 @@ public class ChiDinhTiemDialog extends JDialog {
         JLabel lblTrangThai = new JLabel("Trạng thái:");
         lblTrangThai.setFont(uiFont);
         JComboBox<String> cbTrangThai = new JComboBox<>(new String[]{
-            "cho_tiem", "da_tiem", "hoan_tiem"
+            "cho_tiem", "da_tiem", "huy"
         });
         cbTrangThai.setFont(uiFont);
         cbTrangThai.setPreferredSize(textFieldSize);
