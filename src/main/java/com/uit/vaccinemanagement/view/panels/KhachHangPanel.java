@@ -276,78 +276,11 @@ public class KhachHangPanel extends JPanel {
                 return;
             }
 
-            JDialog editDialog = new JDialog(parentFrame, "Sửa thông tin khách hàng", true);
-            editDialog.setSize(400, 320);
-            editDialog.setLayout(new GridLayout(0, 2, 5, 5));
-
-            // Add form fields (no ID, role, or password fields since they can't be edited by BacSi)
-            addFormField(editDialog, "Họ tên:", khach.getHoTen());
-            addFormField(editDialog, "Email:", khach.getEmail());
-            addFormField(editDialog, "Tên đăng nhập:", khach.getTenDangNhap());
-            addFormField(editDialog, "Ngày sinh (yyyy-mm-dd):",
-                    khach.getNgaySinh() != null ? khach.getNgaySinh().toString() : "");
-
-            String[] genders = {"Nam", "Nữ"};
-            JComboBox<String> cbGioiTinh = new JComboBox<>(genders);
-            cbGioiTinh.setSelectedItem(khach.getGioiTinh());
-            editDialog.add(new JLabel("Giới tính:"));
-            editDialog.add(cbGioiTinh);
-
-            // Add buttons
-            JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
-            JButton btnSave = new JButton("Lưu");
-            JButton btnCancel = new JButton("Hủy");
-            buttonPanel.add(btnSave);
-            buttonPanel.add(btnCancel);
-            editDialog.add(buttonPanel);
-
-            btnSave.addActionListener(e -> {
-                try {
-                    Component[] components = editDialog.getContentPane().getComponents();
-                    String hoTen = ((JTextField) components[1]).getText().trim();
-                    String email = ((JTextField) components[3]).getText().trim();
-                    String tenDangNhap = ((JTextField) components[5]).getText().trim();
-                    String birthDateStr = ((JTextField) components[7]).getText().trim();
-                    String gioiTinh = cbGioiTinh.getSelectedItem().toString();
-
-                    // Validate required fields
-                    if (hoTen.isEmpty()) {
-                        throw new IllegalArgumentException("Họ tên không được để trống");
-                    }
-
-                    // Convert date string to java.sql.Date
-                    java.sql.Date ngaySinh = null;
-                    if (!birthDateStr.isEmpty()) {
-                        try {
-                            ngaySinh = java.sql.Date.valueOf(birthDateStr);
-                        } catch (IllegalArgumentException ex) {
-                            throw new IllegalArgumentException("Ngày sinh không hợp lệ (định dạng yyyy-mm-dd)");
-                        }
-                    }
-
-                    if (bacSiController.updateKhach(maNguoiDung, hoTen, tenDangNhap, email,
-                            ngaySinh, gioiTinh)) {
-                        JOptionPane.showMessageDialog(editDialog, "Cập nhật thành công!");
-                        editDialog.dispose();
-                        loadData();
-                    } else {
-                        JOptionPane.showMessageDialog(editDialog, "Cập nhật thất bại!");
-                    }
-                } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(editDialog, "Lỗi: " + ex.getMessage());
-                }
-            });
-
-            btnCancel.addActionListener(e -> editDialog.dispose());
-
-            editDialog.setLocationRelativeTo(parentFrame);
+            JButton refreshButton = new JButton();
+            refreshButton.addActionListener(e -> loadData());
+            com.uit.vaccinemanagement.view.KhachHangEditDialog editDialog =
+                new com.uit.vaccinemanagement.view.KhachHangEditDialog(parentFrame, khach, bacSiController, refreshButton);
             editDialog.setVisible(true);
-        }
-
-        private void addFormField(JDialog dialog, String label, String value) {
-            dialog.add(new JLabel(label));
-            JTextField textField = new JTextField(value);
-            dialog.add(textField);
         }
 
         private void deleteKhach(String maNguoiDung) {
@@ -366,3 +299,4 @@ public class KhachHangPanel extends JPanel {
         }
     }
 }
+          

@@ -10,10 +10,10 @@ public class TiemChungEditDialog extends JDialog {
 
     public TiemChungEditDialog(JFrame parent, Object[] tiemChungData, BacSiController controller, JButton btnRefresh) {
         super(parent, "Sửa thông tin tiêm chủng", true);
-        setSize(500, 400);
-        setMinimumSize(new Dimension(500, 400));
-        setMaximumSize(new Dimension(500, 400));
-        setPreferredSize(new Dimension(500, 400));
+        setSize(500, 450); // tăng chiều cao từ 430 lên 450
+        setMinimumSize(new Dimension(500, 450));
+        setMaximumSize(new Dimension(500, 450));
+        setPreferredSize(new Dimension(500, 450));
 
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
@@ -162,7 +162,11 @@ public class TiemChungEditDialog extends JDialog {
 
         mainPanel.add(fieldsPanel);
 
-        // Button panel
+        // Panel cho nút (đặt riêng biệt ở dưới cùng)
+        JPanel buttonPanelWrapper = new JPanel();
+        buttonPanelWrapper.setLayout(new BoxLayout(buttonPanelWrapper, BoxLayout.Y_AXIS));
+        buttonPanelWrapper.setOpaque(false);
+
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 16, 0));
         buttonPanel.setOpaque(false);
 
@@ -175,14 +179,15 @@ public class TiemChungEditDialog extends JDialog {
         btnSave.setPreferredSize(buttonSize);
         btnCancel.setPreferredSize(buttonSize);
 
-        // Fix button panel sizing
-        buttonPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, buttonSize.height + 16));
         buttonPanel.add(btnSave);
         buttonPanel.add(btnCancel);
 
-        mainPanel.add(Box.createVerticalStrut(18));
-        mainPanel.add(buttonPanel);
-        mainPanel.add(Box.createVerticalGlue()); // Push buttons up, avoid being cut off
+        buttonPanelWrapper.add(Box.createVerticalStrut(18));
+        buttonPanelWrapper.add(buttonPanel);
+        buttonPanelWrapper.add(Box.createVerticalStrut(18));
+
+        mainPanel.add(Box.createVerticalGlue()); // Đẩy các trường lên trên
+        mainPanel.add(buttonPanelWrapper); // Panel nút nằm dưới cùng
 
         btnSave.addActionListener(e -> {
             try {
