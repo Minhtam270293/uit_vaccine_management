@@ -10,11 +10,9 @@ import java.awt.*;
 import java.util.List;
 
 public class ChiDinhTiemDialog extends JDialog {
-    private final BacSiController bacSiController;
 
     public ChiDinhTiemDialog(JFrame parent, NguoiDung currentUser, BacSiController bacSiController) {
         super(parent, "Tạo chỉ định tiêm", true);
-        this.bacSiController = bacSiController;
         setSize(500, 450);
 
         JPanel mainPanel = new JPanel(new BorderLayout());
@@ -34,12 +32,6 @@ public class ChiDinhTiemDialog extends JDialog {
         Font uiFont = new Font("Arial", Font.PLAIN, 15);
         Font btnFont = new Font("Arial", Font.BOLD, 15);
         Dimension textFieldSize = new Dimension(220, 36);
-
-        javax.swing.border.Border roundedBorder = BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1, true),
-            BorderFactory.createEmptyBorder(2, 8, 2, 8)
-        );
-
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(4, 8, 4, 8);
         gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -50,6 +42,8 @@ public class ChiDinhTiemDialog extends JDialog {
         JComboBox<String> cbKhach = new JComboBox<>();
         cbKhach.setFont(uiFont);
         cbKhach.setPreferredSize(textFieldSize);
+        
+        // Lấy danh sách khách hàng từ controller
         List<NguoiDung> khachList = bacSiController.getAllCustomers();
         DefaultComboBoxModel<String> khachModel = new DefaultComboBoxModel<>();
         for (NguoiDung khach : khachList) {
@@ -57,12 +51,14 @@ public class ChiDinhTiemDialog extends JDialog {
         }
         cbKhach.setModel(khachModel);
 
-        // Vaccine
+        // Vắc xin
         JLabel lblVaccine = new JLabel("Vắc xin:");
         lblVaccine.setFont(uiFont);
         JComboBox<String> cbVaccine = new JComboBox<>();
         cbVaccine.setFont(uiFont);
         cbVaccine.setPreferredSize(textFieldSize);
+        
+        // Lấy danh sách vắc xin từ controller
         List<Object[]> vaccines = bacSiController.getAvailableVaccines();
         for (Object[] v : vaccines) {
             String maVaccine = (String) v[0];
@@ -120,7 +116,7 @@ public class ChiDinhTiemDialog extends JDialog {
         ghiChuScroll.setPreferredSize(new Dimension(textFieldSize.width, textFieldSize.height * 3));
         ghiChuScroll.setBorder(BorderFactory.createEmptyBorder());
 
-        // Buttons
+        // Các nút
         Dimension buttonSizeChiDinh = new Dimension(120, 36);
         AuthButton btnTaoChiDinh = new AuthButton("Tạo chỉ định", new Color(210, 90, 22));
         btnTaoChiDinh.setPreferredSize(buttonSizeChiDinh);
@@ -135,7 +131,7 @@ public class ChiDinhTiemDialog extends JDialog {
         panelButtonChiDinh.add(btnTaoChiDinh);
         panelButtonChiDinh.add(btnHuy);
 
-        // Add to layout
+        // Thêm các thành phần vào layout
         int row = 0;
         gbc.gridx = 0; gbc.gridy = row; panel.add(lblKhach, gbc);
         gbc.gridx = 1; gbc.gridy = row++; panel.add(cbKhach, gbc);
@@ -156,9 +152,10 @@ public class ChiDinhTiemDialog extends JDialog {
         mainPanel.add(panel, BorderLayout.CENTER);
         setContentPane(mainPanel);
 
-        // Actions
+        // Hành động cho nút Hủy
         btnHuy.addActionListener(ev -> dispose());
 
+        // Hành động cho nút Tạo chỉ định
         btnTaoChiDinh.addActionListener(ev -> {
             try {
                 String vaccineStr = (String) cbVaccine.getSelectedItem();
@@ -201,7 +198,7 @@ public class ChiDinhTiemDialog extends JDialog {
         setLocationRelativeTo(parent);
     }
 
-    // Rounded border helper class
+    // Lớp hỗ trợ tạo viền bo góc
     static class RoundedBorder extends javax.swing.border.AbstractBorder {
         private final Color color;
         private final int thickness;
