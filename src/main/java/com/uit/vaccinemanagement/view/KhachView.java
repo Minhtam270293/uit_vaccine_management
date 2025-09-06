@@ -163,6 +163,8 @@ public class KhachView {
             }
             table.setModel(model);
 
+            table.setRowHeight(30); // Đặt chiều cao dòng giống bảng quản lý người dùng
+
             // Căn giữa cho các cột số (ví dụ: 0, 2, 3)
             DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
             centerRenderer.setHorizontalAlignment(JLabel.CENTER);
