@@ -3,6 +3,7 @@ package com.uit.vaccinemanagement.view.panels;
 import com.uit.vaccinemanagement.controller.BacSiController;
 import com.uit.vaccinemanagement.model.NguoiDung;
 import com.uit.vaccinemanagement.view.dialogs.KhachHangEditDialog;
+import com.uit.vaccinemanagement.view.SharedComponents;
 import javax.swing.*;
 import javax.swing.table.*;
 import java.awt.*;
@@ -60,8 +61,54 @@ public class KhachHangPanel extends JPanel {
         // Search panel
         JPanel searchPanel = new JPanel();
         searchPanel.setLayout(new BoxLayout(searchPanel, BoxLayout.X_AXIS));
-        searchField = new JTextField();
+        JTextField searchField = new JTextField() {
+            private boolean showingPlaceholder = true;
+
+            {
+                setLayout(new BorderLayout());
+                JLabel placeholder = new JLabel("🔍 Tìm kiếm khách hàng", SwingConstants.LEFT);
+                placeholder.setForeground(Color.GRAY);
+                placeholder.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0));
+                add(placeholder, BorderLayout.CENTER);
+
+                addFocusListener(new java.awt.event.FocusAdapter() {
+                    @Override
+                    public void focusGained(java.awt.event.FocusEvent e) {
+                        if (showingPlaceholder) {
+                            remove(placeholder);
+                            showingPlaceholder = false;
+                            repaint();
+                        }
+                    }
+
+                    @Override
+                    public void focusLost(java.awt.event.FocusEvent e) {
+                        if (getText().isEmpty()) {
+                            add(placeholder, BorderLayout.CENTER);
+                            showingPlaceholder = true;
+                            repaint();
+                        }
+                    }
+                });
+            }
+
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(Color.WHITE); // Đảm bảo nền luôn màu trắng
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 16, 16);
+                g2.dispose();
+                super.paintComponent(g);
+            }
+        };
+        searchField.setOpaque(false); // Đảm bảo nền không bị ghi đè
+        searchField.setBackground(Color.WHITE); // Đặt màu nền trắng
         searchField.setPreferredSize(new Dimension(200, 30));
+        searchField.setBorder(BorderFactory.createCompoundBorder(
+            new SharedComponents.RoundedBorder(Color.LIGHT_GRAY, 1, 16), // sử dụng custom border bo góc 16px
+            BorderFactory.createEmptyBorder(2, 8, 2, 8)
+        ));
         JButton btnSearch = new JButton("Tìm kiếm");
         JButton btnRefresh = new JButton("Tải lại");
 
@@ -91,7 +138,6 @@ public class KhachHangPanel extends JPanel {
             loadData();
         });
 
-        searchPanel.add(new JLabel("Tìm kiếm khách hàng"));
         searchPanel.add(Box.createHorizontalStrut(5));
         searchPanel.add(searchField);
         searchPanel.add(Box.createHorizontalStrut(10));

@@ -10,6 +10,7 @@ import java.util.List;
 import javax.swing.*;
 import java.awt.*;
 import com.uit.vaccinemanagement.view.AuthButton; // Thêm dòng này
+import com.uit.vaccinemanagement.view.SharedComponents;
 
 public class VaccineEditDialog extends JDialog {
 
@@ -31,8 +32,8 @@ public class VaccineEditDialog extends JDialog {
         Dimension textFieldSize = new Dimension(220, 36); // giống ChiDinhTiemDialog
 
         javax.swing.border.Border roundedBorder = BorderFactory.createCompoundBorder(
-                new RoundedBorder(Color.LIGHT_GRAY, 1, 12),
-                BorderFactory.createEmptyBorder(2, 8, 2, 8)
+            new SharedComponents.RoundedBorder(Color.LIGHT_GRAY, 1, 16), // sử dụng custom border bo góc 16px
+            BorderFactory.createEmptyBorder(2, 8, 2, 8)
         );
 
         JPanel fieldsPanel = new JPanel(new GridBagLayout());
