@@ -173,14 +173,18 @@ public class TiemChungPanel extends JPanel {
         });
 
         btnNext.addActionListener(e -> {
-            currentPage++;
-            loadData();
+            int totalRows = bacSiController.getTotalTiemChungByBacSi(currentUser.getMaNguoiDung());
+            int totalPages = (int) Math.ceil((double) totalRows / pageSize);
+            if (currentPage < totalPages) {
+                currentPage++;
+                loadData();
+            }
         });
 
         return paginationPanel;
     }
 
-    private void loadData() {
+    public void loadData() {
         // Get data for current page
         int offset = (currentPage - 1) * pageSize;
         List<Object[]> data = bacSiController.getTiemChungByBacSiPaginated(
@@ -242,7 +246,13 @@ public class TiemChungPanel extends JPanel {
 
     private void updatePaginationInfo(int totalRows) {
         int totalPages = (int) Math.ceil((double) totalRows / pageSize);
-        lblPageInfo.setText(String.format("Trang %d/%d", currentPage, totalPages));
+        if (currentPage > totalPages) {
+            currentPage = totalPages;
+        }
+        if (currentPage < 1) {
+            currentPage = 1;
+        }
+        lblPageInfo.setText(String.format("Trang %d/%d", currentPage, totalPages == 0 ? 1 : totalPages));
         lblTotalRows.setText(String.format("Tổng số: %d", totalRows));
         btnPrev.setEnabled(currentPage > 1);
         btnNext.setEnabled(currentPage < totalPages);

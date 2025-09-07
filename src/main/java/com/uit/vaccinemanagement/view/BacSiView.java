@@ -152,6 +152,8 @@ public class BacSiView {
         btnTiemChung.addActionListener((ActionEvent e) -> {
             cardLayout.show(rightPanel, "TIEMCHUNG");
             frame.setSize(1180, 500);
+            // Refresh TiemChungPanel data when switching to it
+            tiemChungPanel.loadData();
         });
 
         btnKhachHang.addActionListener((ActionEvent e) -> {
