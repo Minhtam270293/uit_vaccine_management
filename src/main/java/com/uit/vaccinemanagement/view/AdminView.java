@@ -1,49 +1,18 @@
 package com.uit.vaccinemanagement.view;
 
 import com.uit.vaccinemanagement.controller.AdminController;
-import java.awt.event.ActionEvent;
-import java.util.List;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.net.URL;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.DefaultCellEditor;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.ListSelectionModel;
-import javax.swing.SwingConstants;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.JTableHeader;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
-
-import javax.swing.JComboBox;
-import javax.swing.JDialog;
-
-import com.uit.vaccinemanagement.dao.NguoiDungDAO;
-import com.uit.vaccinemanagement.dao.NhaSanXuatDAO;
-import com.uit.vaccinemanagement.dao.VaccineDAO;
 import com.uit.vaccinemanagement.model.NguoiDung;
-import com.uit.vaccinemanagement.model.Vaccine;
 import com.uit.vaccinemanagement.view.panels.*;
-
-import javax.swing.*;
-import java.awt.*;
 
 public class AdminView {
 
@@ -133,7 +102,7 @@ public class AdminView {
         buttonPanel.add(btnVaccine);
         buttonPanel.add(btnBenh);
         buttonPanel.add(btnNhaSanXuat);
-        
+
         btnNguoiDung.addActionListener(e -> cardLayout.show(cardPanel, NGUOIDUNG_PANEL));
         btnVaccine.addActionListener(e -> cardLayout.show(cardPanel, VACCINE_PANEL));
         btnBenh.addActionListener(e -> cardLayout.show(cardPanel, BENH_PANEL));
@@ -158,7 +127,6 @@ public class AdminView {
             cardLayout.show(cardPanel, NHASX_PANEL);
             frame.setSize(1018, 800);
         });
-
 
         // Thêm buttonPanel vào leftPanel
         leftPanel.add(buttonPanel);
@@ -198,7 +166,7 @@ public class AdminView {
         splitPane.setRightComponent(cardPanel);
 
         frame.getContentPane().add(splitPane);
-    
+
         frame.setVisible(true);
     }
 }

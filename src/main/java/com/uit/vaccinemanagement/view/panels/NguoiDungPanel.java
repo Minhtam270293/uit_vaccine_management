@@ -2,7 +2,6 @@ package com.uit.vaccinemanagement.view.panels;
 
 import com.uit.vaccinemanagement.controller.AdminController;
 import com.uit.vaccinemanagement.model.NguoiDung;
-import com.uit.vaccinemanagement.util.Role;
 import com.uit.vaccinemanagement.view.dialogs.NguoiDungAddDialog;
 import com.uit.vaccinemanagement.view.dialogs.NguoiDungEditDialog;
 
@@ -102,21 +101,21 @@ public class NguoiDungPanel extends JPanel {
         searchField.setBackground(Color.WHITE); // Đặt màu nền trắng
         searchField.setPreferredSize(new Dimension(200, 30));
         searchField.setBorder(BorderFactory.createCompoundBorder(
-            new RoundedBorder(Color.LIGHT_GRAY, 1, 16), // sử dụng custom border bo góc 16px
-            BorderFactory.createEmptyBorder(2, 8, 2, 8)
+                new RoundedBorder(Color.LIGHT_GRAY, 1, 16), // sử dụng custom border bo góc 16px
+                BorderFactory.createEmptyBorder(2, 8, 2, 8)
         ));
         JButton btnSearch = new JButton("Tìm kiếm");
         JButton btnAdd = new JButton("Thêm");
         JButton btnDownload = new JButton("Tải xuống");
 
-       btnAdd.addActionListener(e -> {
-           JButton refreshButton = new JButton();
-           refreshButton.addActionListener(ev -> loadData());
-           NguoiDungAddDialog addDialog = new NguoiDungAddDialog(parentFrame, adminController, refreshButton);
-           addDialog.setVisible(true);
-       });
+        btnAdd.addActionListener(e -> {
+            JButton refreshButton = new JButton();
+            refreshButton.addActionListener(ev -> loadData());
+            NguoiDungAddDialog addDialog = new NguoiDungAddDialog(parentFrame, adminController, refreshButton);
+            addDialog.setVisible(true);
+        });
 
-       // Nút tải xuống
+        // Nút tải xuống
         btnDownload.addActionListener(e -> {
             String downloadUrl = "https://example.com/file.xlsx"; // link cố định (có thể đổi sang API export thực tế)
             JFileChooser fileChooser = new JFileChooser();
@@ -127,8 +126,7 @@ public class NguoiDungPanel extends JPanel {
             if (userSelection == JFileChooser.APPROVE_OPTION) {
                 java.io.File saveFile = fileChooser.getSelectedFile();
                 try (java.io.BufferedInputStream in = new java.io.BufferedInputStream(
-                        new java.net.URL(downloadUrl).openStream());
-                    java.io.FileOutputStream fileOutputStream = new java.io.FileOutputStream(saveFile)) {
+                        new java.net.URL(downloadUrl).openStream()); java.io.FileOutputStream fileOutputStream = new java.io.FileOutputStream(saveFile)) {
 
                     byte[] dataBuffer = new byte[1024];
                     int bytesRead;
@@ -146,7 +144,6 @@ public class NguoiDungPanel extends JPanel {
             }
         });
 
-
         // Nút tìm kiếm
         btnSearch.addActionListener(e -> {
             String keyword = searchField.getText().trim().toLowerCase();
@@ -157,8 +154,8 @@ public class NguoiDungPanel extends JPanel {
 
             List<NguoiDung> filteredList = adminController.getAllNguoiDung().stream()
                     .filter(nd -> nd.getHoTen().toLowerCase().contains(keyword)
-                            || nd.getTenDangNhap().toLowerCase().contains(keyword)
-                            || nd.getEmail().toLowerCase().contains(keyword))
+                    || nd.getTenDangNhap().toLowerCase().contains(keyword)
+                    || nd.getEmail().toLowerCase().contains(keyword))
                     .toList();
 
             updateTable(filteredList);
@@ -167,7 +164,7 @@ public class NguoiDungPanel extends JPanel {
             btnPrev.setEnabled(false);
             btnNext.setEnabled(false);
         });
-        
+
         searchPanel.add(Box.createHorizontalStrut(5));
         searchPanel.add(searchField);
         searchPanel.add(Box.createHorizontalStrut(10));
@@ -378,8 +375,8 @@ public class NguoiDungPanel extends JPanel {
         private void showEditDialog(NguoiDung nd) {
             JButton refreshButton = new JButton();
             refreshButton.addActionListener(e -> loadData());
-            NguoiDungEditDialog editDialog =
-                new NguoiDungEditDialog(parentFrame, nd, adminController, refreshButton);
+            NguoiDungEditDialog editDialog
+                    = new NguoiDungEditDialog(parentFrame, nd, adminController, refreshButton);
             editDialog.setVisible(true);
         }
 
@@ -397,6 +394,7 @@ public class NguoiDungPanel extends JPanel {
 
     // Thêm class RoundedBorder vào cuối file (nếu chưa có)
     class RoundedBorder extends javax.swing.border.AbstractBorder {
+
         private final Color color;
         private final int thickness;
         private final int arc;

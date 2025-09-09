@@ -2,7 +2,6 @@ package com.uit.vaccinemanagement.view.dialogs;
 
 import com.uit.vaccinemanagement.controller.AdminController;
 import com.uit.vaccinemanagement.model.Vaccine;
-import com.uit.vaccinemanagement.dao.VaccineDAO;
 import com.uit.vaccinemanagement.model.Benh;
 import com.uit.vaccinemanagement.model.NhaSanXuat;
 import java.util.List;
@@ -32,8 +31,8 @@ public class VaccineEditDialog extends JDialog {
         Dimension textFieldSize = new Dimension(220, 36); // giống ChiDinhTiemDialog
 
         javax.swing.border.Border roundedBorder = BorderFactory.createCompoundBorder(
-            new SharedComponents.RoundedBorder(Color.LIGHT_GRAY, 1, 16), // sử dụng custom border bo góc 16px
-            BorderFactory.createEmptyBorder(2, 8, 2, 8)
+                new SharedComponents.RoundedBorder(Color.LIGHT_GRAY, 1, 16), // sử dụng custom border bo góc 16px
+                BorderFactory.createEmptyBorder(2, 8, 2, 8)
         );
 
         JPanel fieldsPanel = new JPanel(new GridBagLayout());
@@ -334,7 +333,7 @@ public class VaccineEditDialog extends JDialog {
                 String selectedNSX = cbNhaSX.getSelectedItem().toString();
                 String maNhaSX = selectedNSX.split(" - ")[0];
                 vc.setMaNhaSX(maNhaSX);
-                
+
                 vc.setNgayTao(new java.sql.Timestamp(System.currentTimeMillis()));
 
                 if (controller.updateVaccine(vc)) {

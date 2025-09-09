@@ -1,7 +1,5 @@
 package com.uit.vaccinemanagement.view;
 
-import com.uit.vaccinemanagement.view.AuthButton;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -9,7 +7,9 @@ import java.awt.image.BufferedImage;
 public class AuthView {
 
     public interface AuthCallback {
+
         void onLogin(String email, String password);
+
         void onSignUpClicked();
     }
 
@@ -48,10 +48,10 @@ public class AuthView {
         lblEmail.setFont(uiFont);
 
         String[] emails = {
-                "admin@example.com",
-                "bacsiA@example.com",
-                "khachB@example.com",
-                "Nhập email khác..."
+            "admin@example.com",
+            "bacsiA@example.com",
+            "khachB@example.com",
+            "Nhập email khác..."
         };
         JComboBox<String> cbEmail = new JComboBox<>(emails);
         cbEmail.setFont(uiFont);
@@ -107,16 +107,19 @@ public class AuthView {
         emailInputPanel.add(btnRefresh, BorderLayout.EAST);
 
         // Thêm Email
-        gbc.gridx = 0; gbc.gridy = 0;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
         panel.add(lblEmail, gbc);
-        gbc.gridx = 1; gbc.gridy = 0;
+        gbc.gridx = 1;
+        gbc.gridy = 0;
         panel.add(emailInputPanel, gbc);
 
         // Mật khẩu
         JLabel lblPass = new JLabel("Mật khẩu:");
         lblPass.setFont(uiFont);
 
-        gbc.gridx = 0; gbc.gridy = 2;
+        gbc.gridx = 0;
+        gbc.gridy = 2;
         panel.add(lblPass, gbc);
 
         JPasswordField txtPass = new JPasswordField("123456");
@@ -127,11 +130,13 @@ public class AuthView {
                 BorderFactory.createEmptyBorder(2, 8, 2, 8)
         ));
 
-        gbc.gridx = 1; gbc.gridy = 2;
+        gbc.gridx = 1;
+        gbc.gridy = 2;
         panel.add(txtPass, gbc);
 
         // Khoảng cách
-        gbc.gridx = 0; gbc.gridy = 3;
+        gbc.gridx = 0;
+        gbc.gridy = 3;
         gbc.gridwidth = 2;
         panel.add(Box.createVerticalStrut(18), gbc);
 
@@ -149,7 +154,8 @@ public class AuthView {
         buttonPanel.add(btnLogin);
         buttonPanel.add(btnSignUp);
 
-        gbc.gridx = 0; gbc.gridy = 4;
+        gbc.gridx = 0;
+        gbc.gridy = 4;
         gbc.gridwidth = 2;
         panel.add(buttonPanel, gbc);
 
@@ -203,6 +209,7 @@ public class AuthView {
 
     // Border bo góc
     class RoundedBorder extends javax.swing.border.AbstractBorder {
+
         private final Color color;
         private final int thickness;
         private final int arc;

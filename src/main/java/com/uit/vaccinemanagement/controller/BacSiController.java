@@ -5,7 +5,6 @@ import com.uit.vaccinemanagement.dao.NguoiDungDAO;
 import com.uit.vaccinemanagement.dao.VaccineDAO;
 import com.uit.vaccinemanagement.model.TiemChung;
 import com.uit.vaccinemanagement.model.NguoiDung;
-import com.uit.vaccinemanagement.model.Vaccine;
 import com.uit.vaccinemanagement.util.Role;
 import java.util.*;
 
@@ -111,13 +110,13 @@ public class BacSiController {
         }
 
         maTiemChung = maTiemChung.trim();
-        
+
         // Check if record exists and get its vaccine ID
         Object[] record = getTiemChungById(maTiemChung);
         if (record == null) {
             throw new IllegalArgumentException("Vaccination record does not exist");
         }
-        
+
         // Get the full record to get the vaccine ID
         TiemChung existingRecord = tiemChungDAO.getByMaTiemChung(maTiemChung);
         if (existingRecord == null) {
@@ -125,18 +124,18 @@ public class BacSiController {
         }
 
         String maVaccine = existingRecord.getMaVaccine();
-        
+
         // Delete the record first
         if (!tiemChungDAO.deleteTiemChung(maTiemChung)) {
             return false;
         }
-        
+
         // After successful deletion, increase the vaccine quantity
         if (!vaccineDAO.increaseQuantity(maVaccine)) {
             // Log the error but don't rollback the deletion
             System.err.println("Warning: Could not update vaccine quantity after deletion for vaccine " + maVaccine);
         }
-        
+
         return true;
     }
 
@@ -179,7 +178,7 @@ public class BacSiController {
         }
 
         String ghiChu = (String) updatedData[5];
-        
+
         // Get existing record to preserve non-editable fields
         TiemChung existingRecord = tiemChungDAO.getByMaTiemChung(maTiemChung.trim());
         if (existingRecord == null) {
@@ -189,7 +188,7 @@ public class BacSiController {
         // Handle vaccine quantity if vaccine is changed
         String oldMaVaccine = existingRecord.getMaVaccine();
         String newMaVaccine = maVaccine.trim();
-        
+
         if (!oldMaVaccine.equals(newMaVaccine)) {
             // Return old vaccine to inventory (+1)
             if (!vaccineDAO.increaseQuantity(oldMaVaccine)) {
@@ -222,7 +221,7 @@ public class BacSiController {
             }
             return false;
         }
-        
+
         return true;
     }
 

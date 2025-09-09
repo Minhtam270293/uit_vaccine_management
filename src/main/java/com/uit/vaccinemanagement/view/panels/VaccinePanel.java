@@ -11,7 +11,6 @@ import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.net.URL;
 import java.util.List;
 
@@ -58,7 +57,6 @@ public class VaccinePanel extends JPanel {
         //         }
         //     }
         // };
-
         // Pagination panel
         JPanel paginationPanel = createPaginationPanel();
         add(paginationPanel, BorderLayout.SOUTH);
@@ -120,8 +118,8 @@ public class VaccinePanel extends JPanel {
         searchField.setBackground(Color.WHITE); // Đặt màu nền trắng
         searchField.setPreferredSize(new Dimension(200, 30));
         searchField.setBorder(BorderFactory.createCompoundBorder(
-            new SharedComponents.RoundedBorder(Color.LIGHT_GRAY, 1, 16), // sử dụng custom border bo góc 16px
-            BorderFactory.createEmptyBorder(2, 8, 2, 8)
+                new SharedComponents.RoundedBorder(Color.LIGHT_GRAY, 1, 16), // sử dụng custom border bo góc 16px
+                BorderFactory.createEmptyBorder(2, 8, 2, 8)
         ));
         JButton btnSearch = new JButton("Tìm kiếm");
         JButton btnAdd = new JButton("Thêm");
@@ -141,8 +139,8 @@ public class VaccinePanel extends JPanel {
             // Lọc danh sách theo keyword
             vaccineList = adminController.getAllVaccine().stream()
                     .filter(v -> v.getMaVaccine().toLowerCase().contains(keyword)
-                            || v.getTenVaccine().toLowerCase().contains(keyword)
-                            || v.getSoLo().toLowerCase().contains(keyword))
+                    || v.getTenVaccine().toLowerCase().contains(keyword)
+                    || v.getSoLo().toLowerCase().contains(keyword))
                     .toList();
 
             // Cập nhật bảng với danh sách đã lọc
@@ -171,8 +169,7 @@ public class VaccinePanel extends JPanel {
             int userSelection = fileChooser.showSaveDialog(parentFrame);
             if (userSelection == JFileChooser.APPROVE_OPTION) {
                 java.io.File saveFile = fileChooser.getSelectedFile();
-                try (java.io.BufferedInputStream in = new java.io.BufferedInputStream(new java.net.URL(downloadUrl).openStream());
-                    java.io.FileOutputStream fileOutputStream = new java.io.FileOutputStream(saveFile)) {
+                try (java.io.BufferedInputStream in = new java.io.BufferedInputStream(new java.net.URL(downloadUrl).openStream()); java.io.FileOutputStream fileOutputStream = new java.io.FileOutputStream(saveFile)) {
 
                     byte[] dataBuffer = new byte[1024];
                     int bytesRead;
@@ -326,7 +323,6 @@ public class VaccinePanel extends JPanel {
             }
         });
     }
-
 
     private void showVaccineImage(int row) {
         String maVaccine = table.getValueAt(row, 0).toString();

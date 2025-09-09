@@ -2,7 +2,6 @@ package com.uit.vaccinemanagement.controller;
 
 import com.uit.vaccinemanagement.model.*;
 import com.uit.vaccinemanagement.dao.*;
-import java.sql.SQLException;
 import java.util.*;
 
 public class AdminController {
@@ -139,9 +138,13 @@ public class AdminController {
     // Vaccine Management Methods
     public List<Vaccine> getVaccinePage(int page, int pageSize) {
         // Business logic: Handle pagination validation
-        if (page <= 0) page = DEFAULT_PAGE;
-        if (pageSize <= 0) pageSize = DEFAULT_PAGE_SIZE;
-        
+        if (page <= 0) {
+            page = DEFAULT_PAGE;
+        }
+        if (pageSize <= 0) {
+            pageSize = DEFAULT_PAGE_SIZE;
+        }
+
         return vaccineDAO.getVaccinePage(page, pageSize);
     }
 

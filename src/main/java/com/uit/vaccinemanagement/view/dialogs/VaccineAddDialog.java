@@ -8,7 +8,6 @@ import com.uit.vaccinemanagement.view.AuthButton;
 
 import javax.swing.*;
 import java.awt.*;
-import java.math.BigDecimal;
 import java.sql.Date;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -120,7 +119,7 @@ public class VaccineAddDialog extends JDialog {
         JComboBox<String> cbBenh = new JComboBox<>();
         cbBenh.setFont(uiFont);
         cbBenh.setPreferredSize(textFieldSize);
-        
+
         // Populate diseases
         List<Benh> benhList = controller.getAllBenh();
         for (Benh benh : benhList) {
@@ -133,7 +132,7 @@ public class VaccineAddDialog extends JDialog {
         JComboBox<String> cbNSX = new JComboBox<>();
         cbNSX.setFont(uiFont);
         cbNSX.setPreferredSize(textFieldSize);
-        
+
         // Populate manufacturers
         List<NhaSanXuat> nsxList = controller.getAllNhaSanXuat();
         for (NhaSanXuat nsx : nsxList) {
@@ -300,12 +299,12 @@ public class VaccineAddDialog extends JDialog {
                 vaccine.setGiaNhap(giaNhap);
                 vaccine.setGiaBan(giaBan);
                 vaccine.setMoTa(moTa);
-                
+
                 String maBenh = selectedBenh.split(" - ")[0];
                 String maNhaSX = selectedNSX.split(" - ")[0];
                 vaccine.setMaBenh(maBenh);
                 vaccine.setMaNhaSX(maNhaSX);
-                
+
                 vaccine.setNgayTao(new java.sql.Timestamp(System.currentTimeMillis()));
 
                 if (controller.addVaccine(vaccine)) {
