@@ -93,11 +93,7 @@ src/
 
 ## Cấu hình Cơ sở dữ liệu
 
-- **MySQL + phpMyAdmin**: Được cấu hình trong `DBConnection.java` với các thông số kết nối đến MySQL và quản lý qua phpMyAdmin. Cụ thể:
-
-  - **URL**: `jdbc:mysql://sql12.freesqldatabase.com:3306/sql12796261?useSSL=false&serverTimezone=UTC`
-  - **User**: `sql12796261`
-  - **Password**: `w3gbfV71bu`
+- **MySQL + phpMyAdmin**: Được cấu hình trong `DBConnection.java` với các thông số kết nối đến MySQL và quản lý qua phpMyAdmin
 
   Đảm bảo rằng MySQL server đang chạy và phpMyAdmin được cấu hình để quản lý cơ sở dữ liệu. Để bật MySQL server và phpMyAdmin:
 
